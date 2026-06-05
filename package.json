@@ -1,0 +1,13 @@
+{
+  "name": "retirement-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local-only retirement planning app. All data stays on your PC.",
+  "scripts": {
+    "start": "concurrently -k -n SERVER,CLIENT -c blue,green \"npm --prefix server start\" \"npm --prefix client run dev\"",
+    "install:all": "npm install && npm --prefix server install && npm --prefix client install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
