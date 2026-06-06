@@ -80,7 +80,9 @@ h4 { margin: 0 0 12px; font-size: 14px; color: var(--muted); }
 .input-form {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 24px;
+  /* Extra bottom padding so the last fields aren't hidden behind the
+     fixed floating action bar (Save / Calculate). */
+  padding: 24px 24px 96px;
 }
 
 details {
@@ -130,6 +132,9 @@ details[open] > summary { margin-bottom: 12px; }
   border: 1px solid var(--border);
   border-radius: 4px;
   font-size: 14px;
+  /* Match the page font — without this, <input type="date"> falls back to the
+     browser's default UI font and looks different from every other field. */
+  font-family: inherit;
   background: white;
   color: var(--text);
 }
@@ -166,7 +171,9 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* ============ RESULTS SCREEN ============ */
 .results-screen {
-  padding: 20px;
+  /* Extra bottom padding so the last content isn't hidden behind the
+     fixed floating Back button. */
+  padding: 20px 20px 88px;
 }
 .results-header {
   display: flex;
@@ -451,6 +458,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   border: 1px solid var(--border);
   border-radius: 4px;
   font-size: 14px;
+  font-family: inherit;
   background: white;
   color: var(--text);
 }
@@ -470,27 +478,42 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
 }
 
-/* ── Separate Save / Calculate buttons ───────────────────────────────────── */
-.actions {
+/* ── Floating action bar (Save / Calculate, or Back on Results) ───────────
+   Pinned to the bottom-right of the viewport so it's always reachable
+   without scrolling. A translucent, blurred pill keeps it readable over
+   page content. The `.lang-toggle` (z-index 1000) stays above it. */
+.actions,
+.floating-actions {
+  position: fixed;
+  bottom: 16px;
+  right: 18px;
+  z-index: 900;
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 32px 0 24px;
-  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  flex-wrap: nowrap;
+  background: rgba(255, 255, 255, 0.95);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
 }
 
 .btn-save {
-  padding: 10px 22px;
+  padding: 7px 14px;
   background: #f0f6ff;
   color: #1f6feb;
   border: 1.5px solid #1f6feb;
   border-radius: 6px;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   /* Fixed width keeps the button in place when its label swaps between
      "Save" / "Saving…" / "✓ Saved" / "⚠ Retry". */
-  min-width: 130px;
+  min-width: 92px;
   text-align: center;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
@@ -508,17 +531,31 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 
 .btn-calculate {
-  padding: 10px 28px;
+  padding: 7px 16px;
   background: #1f6feb;
   color: #fff;
   border: none;
   border-radius: 6px;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
 }
 .btn-calculate:hover { background: #1558c0; }
+
+/* Floating Back button on the Results screen. */
+.btn-back {
+  padding: 7px 16px;
+  background: #fff;
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-back:hover { background: #eef5ff; }
 
 /* Inline keyboard-shortcut hint, used on Calculate and Back buttons. */
 .kbd-hint {
@@ -1543,11 +1580,22 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   .data-toolbar { flex-direction: column; align-items: stretch; }
   .btn-data { width: 100%; }
 
-  /* Action buttons (Save / Calculate) stack and fill width */
-  .actions { flex-direction: column; align-items: stretch; }
-  .actions button, .btn-save, .btn-calculate { width: 100%; }
+  /* Floating action bar: span the bottom edge and let buttons share width. */
+  .actions,
+  .floating-actions {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    justify-content: stretch;
+  }
+  .actions .btn-save,
+  .actions .btn-calculate,
+  .floating-actions .btn-back { flex: 1 1 auto; }
+  /* Hide the keyboard-shortcut chips on phones (no physical keyboard). */
+  .actions .kbd-hint,
+  .floating-actions .kbd-hint { display: none; }
 
-  /* Results header: stack the title and Back button */
+  /* Results header: stack the title (Back button now floats). */
   .results-header { flex-direction: column; align-items: flex-start; gap: 8px; }
 
   /* Chart wrapper: trim padding so the plot gets more width */

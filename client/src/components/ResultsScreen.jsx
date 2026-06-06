@@ -209,11 +209,16 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
     <div className="results-screen">
       <div className="results-header">
         <h1>{t('res.title')}</h1>
+      </div>
+
+      {/* Floating Back button — always visible at the bottom of the page. */}
+      <div className="floating-actions">
         <button
+          className="btn-back"
           onClick={onBack}
           title="Return to the input form — keyboard shortcut: Ctrl + ← or Alt + ←"
         >
-          {t('btn.back')} <span className="kbd-hint">Ctrl / Alt + ←</span>
+          ← {t('btn.back')} <span className="kbd-hint">Ctrl / Alt + ←</span>
         </button>
       </div>
 

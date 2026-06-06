@@ -21,7 +21,7 @@ function LanguageToggle() {
         onClick={() => setLang('ja')}
         type="button"
       >
-        日本語
+        JP
       </button>
     </div>
   );
