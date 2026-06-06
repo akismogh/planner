@@ -28,6 +28,8 @@ const EVENT_CONFIG = [
   { flag: 'flagRMDStart',      label: 'RMD start',     icon: '💰', cls: 'evt-rmd' },
   { flag: 'flagULCancelled',   label: 'UL cancelled',  icon: '📃', cls: 'evt-ul' },
   { flag: 'flagRentalStart',   label: 'Rental start',  icon: '🏘️', cls: 'evt-rental' },
+  { flag: 'flagNewHome',       label: 'New home',      icon: '🏠', cls: 'evt-newhome' },
+  { flag: 'flagNewHomeSold',   label: 'New home sold', icon: '🏠', cls: 'evt-house' },
   { flag: 'flagVehiclePurchase', label: 'Vehicle bought', icon: '🚗', cls: 'evt-vehicle' },
   { flag: 'flagLoanStart', label: 'Loan taken', icon: '🏦', cls: 'evt-loan' },
   { flag: 'flagHouseSold',     label: 'House sold',    icon: '🏠', cls: 'evt-house' },
@@ -137,6 +139,11 @@ const COLUMNS = [
   { key: 'realEstateValue', label: 'Real Estate', money: true, group: 'realestate' },
   { key: 'loanBalance', label: 'Loan Balance', money: true, group: 'realestate' },
   { key: 'netHomeEquity', label: 'Net Equity', money: true, group: 'realestate' },
+  // ── 8. New home detail ───────────────────────────────────────────────
+  { key: 'newHomeValue', label: 'New Home Value', money: true, group: 'newhome' },
+  { key: 'newHomeLoan', label: 'New Home Loan', money: true, group: 'newhome' },
+  { key: 'newHomeEquity', label: 'New Home Equity', money: true, group: 'newhome' },
+  { key: 'newHomeMortgage', label: 'New Home Mortgage', money: true, group: 'newhome' },
 ];
 
 // Expand the `__iras__` / `__k401s__` placeholders into one column per account,
@@ -224,6 +231,7 @@ export default function ResultsTable({ rows }) {
           <span className="evt-badge evt-rmd">💰 RMDs (73)</span>
           <span className="evt-badge evt-ul">📃 UL cancelled</span>
           <span className="evt-badge evt-rental">🏘️ Rental start</span>
+          <span className="evt-badge evt-newhome">🏠 New home</span>
           <span className="evt-badge evt-vehicle">🚗 Vehicle bought</span>
           <span className="evt-badge evt-loan">🏦 Loan taken</span>
           <span className="evt-badge evt-house">🏠 House sold</span>

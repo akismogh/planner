@@ -116,6 +116,9 @@ export function defaultInputs() {
     //     sellAge is IGNORED when rental is enabled (this one takes over).
     rental: {
       enabled: false,
+      // 0 = start at retirement age (default). Set a value to rent the house
+      // out at a specific age (e.g. 60 while still working to 65).
+      startAge: 0,
       oneTimeSetupCost: 0,
       monthlyRentIncome: 0,
       // Rents typically grow at their own pace (can be higher OR lower than
@@ -125,6 +128,24 @@ export function defaultInputs() {
       monthlyMaintenanceRate: 2.0,
       extraPrincipalDuringRental: 0,
       sellAge: 0,
+    },
+    // ── New Home purchase (move-up / second primary residence) ──
+    // Buy a new home at `purchaseAge`. The price is the NOMINAL price you pay
+    // that year. Down payment leaves the bank; a new mortgage (APR + term)
+    // starts; the home appreciates and accrues maintenance; equity counts
+    // toward net worth. Combine with the Rental option to model "rent the old
+    // house, buy a new one."
+    newHome: {
+      enabled: false,
+      purchaseAge: 60,
+      price: 0,
+      downPayment: 0,
+      apr: 6.5,
+      loanTermYears: 30,
+      appreciationRate: 3.0,
+      maintenanceRate: 1.0,
+      sellAge: 0,
+      saleFeeRate: 6.0,
     },
     ss: {
       mySSAmount: 0,
@@ -964,6 +985,10 @@ export default function InputForm({
               value={data.rental?.enabled ? 1 : 0}
               onChange={(v) => set(['rental', 'enabled'])(Boolean(v))}
               options={[{ value: 0, label: 'No (sell-only or keep)' }, { value: 1, label: 'Yes' }]} />
+            <NumberField label="Start renting at age"
+              value={data.rental?.startAge}
+              onChange={set(['rental', 'startAge'])}
+              hint={`0 = your retirement age (${data.income.myRetirementAge || '—'}). Set e.g. 60 to rent out earlier while still working.`} />
             <NumberField label="One-time setup cost (today's $)"
               value={data.rental?.oneTimeSetupCost}
               onChange={set(['rental', 'oneTimeSetupCost'])}
@@ -991,6 +1016,71 @@ export default function InputForm({
               onChange={set(['rental', 'sellAge'])}
               hint="0 = never sell (hold through life expectancy). Otherwise rental ends and house sells at this age; net equity goes to bank." />
           </div>
+        </div>
+      </details>
+
+      {/* ── New Home Purchase ── */}
+      <details>
+        <summary>🏠 New Home Purchase (move-up / second home)</summary>
+        <p className="section-note">
+          Buy a new primary residence at a chosen age — e.g. while you rent out the
+          current house. The <strong>price is what you actually pay that year</strong>
+          (nominal). The down payment leaves your bank; a new mortgage starts; the home
+          appreciates and accrues maintenance; its equity counts toward net worth.
+          Monthly payment is auto-calculated from price, down, APR and term.
+        </p>
+        <div className="card">
+          <div className="grid-2">
+            <SelectField label="Enable new home purchase"
+              value={data.newHome?.enabled ? 1 : 0}
+              onChange={(v) => set(['newHome', 'enabled'])(Boolean(v))}
+              options={[{ value: 0, label: 'No' }, { value: 1, label: 'Yes' }]} />
+            <NumberField label="Purchase at age"
+              value={data.newHome?.purchaseAge}
+              onChange={set(['newHome', 'purchaseAge'])} />
+            <NumberField label="Purchase price (nominal at that age)"
+              value={data.newHome?.price}
+              onChange={set(['newHome', 'price'])}
+              hint="what you pay when you buy (e.g. 1,200,000)" />
+            <NumberField label="Down payment"
+              value={data.newHome?.downPayment}
+              onChange={set(['newHome', 'downPayment'])}
+              hint="cash from bank at purchase; rest is financed" />
+            <NumberField label="Mortgage APR (%)"
+              value={data.newHome?.apr}
+              onChange={set(['newHome', 'apr'])} step={0.01} />
+            <NumberField label="Mortgage term (years)"
+              value={data.newHome?.loanTermYears}
+              onChange={set(['newHome', 'loanTermYears'])} />
+            <NumberField label="Appreciation rate (%/yr)"
+              value={data.newHome?.appreciationRate}
+              onChange={set(['newHome', 'appreciationRate'])} step={0.1} />
+            <NumberField label="Maintenance rate (%/yr of value)"
+              value={data.newHome?.maintenanceRate}
+              onChange={set(['newHome', 'maintenanceRate'])} step={0.1} />
+            <NumberField label="Sell new home at age"
+              value={data.newHome?.sellAge}
+              onChange={set(['newHome', 'sellAge'])}
+              hint="0 = never sell (hold through life expectancy)" />
+            <NumberField label="Sale fee rate (%)"
+              value={data.newHome?.saleFeeRate}
+              onChange={set(['newHome', 'saleFeeRate'])} step={0.1}
+              hint="realtor + closing, deducted from proceeds when sold" />
+          </div>
+          {/* Live monthly payment preview */}
+          {(() => {
+            const financed = Math.max(0, (Number(data.newHome?.price) || 0) - (Number(data.newHome?.downPayment) || 0));
+            const term = Number(data.newHome?.loanTermYears) || 0;
+            const mo = financed > 0 && term > 0 ? calcLoanPayment(financed, term, Number(data.newHome?.apr) || 0) : 0;
+            const tot = financed > 0 && term > 0 ? calcTotalInterest(financed, term, Number(data.newHome?.apr) || 0) : 0;
+            return mo > 0 ? (
+              <p className="section-note" style={{ marginTop: 10, marginBottom: 0 }}>
+                Financed: <strong>${Math.round(financed).toLocaleString('en-US')}</strong> ·
+                Monthly P&amp;I: <strong style={{ color: '#5b21b6' }}>${Math.round(mo).toLocaleString('en-US')}</strong> ·
+                Total interest: <strong style={{ color: '#b45309' }}>${Math.round(tot).toLocaleString('en-US')}</strong>
+              </p>
+            ) : null;
+          })()}
         </div>
       </details>
 

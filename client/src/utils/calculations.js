@@ -264,7 +264,9 @@ export function simulate(inputs, overrides = {}, options = {}) {
   // Rent grows at its OWN rate (annualRentIncrease) — typically different
   // from CPI inflation. Applied year-over-year from today.
   const rental = inputs.rental || { enabled: false };
-  const rentalStartAge = myRetireAge; // auto-tied to retirement age
+  // Rental start age: defaults to retirement age, but `rental.startAge` (> 0)
+  // overrides it — e.g. rent the house out at 60 while still working to 65.
+  const rentalStartAge = Number(rental.startAge) > 0 ? Number(rental.startAge) : myRetireAge;
   const rentalSellAge = Number(rental.sellAge) || 0;
   const rentalMonthlyIncome = Number(rental.monthlyRentIncome) || 0;
   const rentIncreaseRate = (Number(rental.annualRentIncrease) || 0) / 100;
@@ -272,6 +274,28 @@ export function simulate(inputs, overrides = {}, options = {}) {
   const rentalExtraPI = Number(rental.extraPrincipalDuringRental) || 0;
   const rentalSetupCost = Number(rental.oneTimeSetupCost) || 0;
   let rentalSetupCharged = false; // ensures one-time cost only hits once
+
+  // ── New Home purchase (second property / move-up home) ───────────────────
+  // Buy a new primary residence at `purchaseAge`: the down payment leaves the
+  // bank that year, a new mortgage starts (P&I from cash flow), the home
+  // appreciates and accrues maintenance, and its equity is added to net worth.
+  // Independent of `realEstate` (which can simultaneously become a rental).
+  const newHome = inputs.newHome || { enabled: false };
+  const nhEnabled = !!newHome.enabled && (Number(newHome.price) || 0) > 0;
+  const nhPurchaseAge = Number(newHome.purchaseAge) || 0;
+  const nhPrice = Number(newHome.price) || 0;
+  const nhDown = Number(newHome.downPayment) || 0;
+  const nhAPR = (Number(newHome.apr) || 0) / 100;
+  const nhTermYears = Number(newHome.loanTermYears) || 0;
+  const nhAppr = (Number(newHome.appreciationRate) || 0) / 100;
+  const nhMaintRate = (Number(newHome.maintenanceRate) || 0) / 100;
+  const nhSellAge = Number(newHome.sellAge) || 0;
+  const nhSaleFeeRate = (Number(newHome.saleFeeRate) || 0) / 100;
+  let nhValue = 0;          // current appreciated value (0 until purchased)
+  let nhLoan = 0;           // outstanding mortgage balance
+  let nhMonthlyPI = 0;      // fixed P&I once purchased
+  let nhPurchased = false;
+  let nhSold = false;
 
   // Social security FRA-67 monthly benefits
   const mySSAge = Number(inputs.ss.mySSAge) || 0;
@@ -671,6 +695,39 @@ export function simulate(inputs, overrides = {}, options = {}) {
       rentalSetupCharged = true;
     }
 
+    // ── New Home: purchase event + ongoing mortgage / maintenance ─────
+    // The entered price is the NOMINAL price at the purchase age (what you
+    // actually pay then). Down payment leaves the bank that year; the new
+    // mortgage's P&I and maintenance are recurring expenses; appreciation is
+    // applied in the growth step below; equity is added to net worth.
+    let nhDownThisYear = 0;
+    let nhMortgageThisYear = 0;
+    let nhMaintThisYear = 0;
+    let nhPurchasedThisYear = false;
+    if (nhEnabled && !nhPurchased && nhPurchaseAge > 0 && myAge >= nhPurchaseAge) {
+      nhValue = nhPrice;
+      nhLoan = Math.max(0, nhPrice - nhDown);
+      nhMonthlyPI = nhTermYears > 0 ? calcLoanPayment(nhLoan, nhTermYears, Number(newHome.apr) || 0) : 0;
+      nhDownThisYear = nhDown;
+      nhPurchased = true;
+      nhPurchasedThisYear = true;
+    }
+    if (nhPurchased && !nhSold && nhLoan > 0 && nhMonthlyPI > 0) {
+      const r = nhAPR / 12;
+      for (let m = 0; m < 12; m++) {
+        if (nhLoan <= 0) break;
+        const interest = nhLoan * r;
+        let principal = nhMonthlyPI - interest;
+        if (principal < 0) principal = 0;
+        if (principal > nhLoan) principal = nhLoan;
+        nhMortgageThisYear += interest + principal;
+        nhLoan -= principal;
+      }
+    }
+    if (nhPurchased && !nhSold) {
+      nhMaintThisYear = nhValue * nhMaintRate;
+    }
+
     // UL premium. The FULL premium leaves take-home (an expense). The portion
     // net of the insurance fee (ulToCashMonthly) is added to the cash value
     // BELOW, just before growth, so it compounds at ulGrowth like the rest of
@@ -744,7 +801,8 @@ export function simulate(inputs, overrides = {}, options = {}) {
     const totalExpenses =
       livingAnnual + travelAnnual + mortgagePayment +
       maintenanceAnnual + ulPremiumAnnual + oneTimeExpenseTotal +
-      rentalSetupThisYear + vehicleTotalThisYear + loanPaymentThisYear;
+      rentalSetupThisYear + vehicleTotalThisYear + loanPaymentThisYear +
+      nhDownThisYear + nhMortgageThisYear + nhMaintThisYear;
     const operatingNetCashFlow =
       totalIncome - totalExpenses - totalCashflowImpactingContribs;
 
@@ -776,6 +834,8 @@ export function simulate(inputs, overrides = {}, options = {}) {
       return grow(b + half, Number(k401s[i].growthRate) || 0, 'full') + half;
     });
     if (!houseSold) homeValue = grow(homeValue, reAppr * 100, 'half');
+    // New home appreciates each year it's owned (same half-year convention).
+    if (nhPurchased && !nhSold) nhValue = grow(nhValue, nhAppr * 100, 'half');
 
     // ── STEP 8: Life events ───────────────────────────────────────────
     // Track proceeds separately (don't dump into bank yet) so we can fold
@@ -810,13 +870,25 @@ export function simulate(inputs, overrides = {}, options = {}) {
       loanBalance = 0;
     }
 
+    // New home sale (optional). At nhSellAge, sell the new home: proceeds =
+    // value − remaining loan − sale fee, deposited to bank that year.
+    let nhSoldThisYear = false;
+    let nhSaleProceeds = 0;
+    if (nhPurchased && !nhSold && nhSellAge > 0 && myAge >= nhSellAge) {
+      const fee = nhValue * nhSaleFeeRate;
+      nhSaleProceeds = nhValue - nhLoan - fee;
+      nhSold = true;
+      nhSoldThisYear = true;
+      nhLoan = 0;
+    }
+
     // ── STEP 9: Apply net cash flow ──────────────────────────────────
     // Combine operating cash flow with one-time life-event proceeds so the
     // displayed `netCashFlow` shows the full year's cash story (including
     // sale + UL surrender). The waterfall logic is unchanged.
     const netCashFlow =
       operatingNetCashFlow + houseSaleProceeds + ulSurrenderProceeds +
-      loanProceedsThisYear;
+      loanProceedsThisYear + nhSaleProceeds;
     let totalWithdrawalGross = 0;
     let totalWithdrawalTax = 0;
     if (netCashFlow >= 0) {
@@ -918,12 +990,14 @@ export function simulate(inputs, overrides = {}, options = {}) {
 
     const bankTotal = bankBalances.reduce((a, b) => a + b, 0);
     const netHomeEquity = houseSold ? 0 : homeValue - loanBalance;
+    const newHomeEquity = (nhPurchased && !nhSold) ? nhValue - nhLoan : 0;
     const totalAssets =
       bankTotal +
       ulValue +
       iraBalances.reduce((a, b) => a + b, 0) +
       k401Balances.reduce((a, b) => a + b, 0);
-    const cumulativeNetWorth = totalAssets + netHomeEquity;
+    // Net worth includes BOTH home equities (current house + new home).
+    const cumulativeNetWorth = totalAssets + netHomeEquity + newHomeEquity;
 
     yearly.push({
       year: calYear,
@@ -947,6 +1021,12 @@ export function simulate(inputs, overrides = {}, options = {}) {
       realEstateValue: houseSold ? 0 : homeValue,
       loanBalance: houseSold ? 0 : loanBalance,
       netHomeEquity,
+      newHomeValue: (nhPurchased && !nhSold) ? nhValue : 0,
+      newHomeLoan: (nhPurchased && !nhSold) ? nhLoan : 0,
+      newHomeEquity,
+      newHomeMortgage: nhMortgageThisYear,
+      newHomeMaintenance: nhMaintThisYear,
+      newHomeDown: nhDownThisYear,
       totalAssets,
       livingAnnual,
       travelAnnual,
@@ -1005,6 +1085,8 @@ export function simulate(inputs, overrides = {}, options = {}) {
       flagOneTime: oneTimeExpenseTotal > 0,
       flagOneTimeIn: oneTimeIncomeTotal > 0,
       flagRentalStart: rental.enabled && myAge === rentalStartAge && rentalStartAge > 0,
+      flagNewHome: nhPurchasedThisYear,
+      flagNewHomeSold: nhSoldThisYear,
       flagVehiclePurchase: vehicleDownThisYear > 0,
       flagLoanStart: loanProceedsThisYear > 0,
       flagMoneyOut: moneyRunOutAge !== null && myAge === moneyRunOutAge,

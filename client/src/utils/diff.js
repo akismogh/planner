@@ -57,12 +57,24 @@ const FIELD_LABELS = {
   'survivor.wifeLifeExpectancy': "Survivor scenario: wife's life expectancy",
 
   'rental.enabled': 'Rental option: enabled',
+  'rental.startAge': 'Rental option: start renting at age',
   'rental.oneTimeSetupCost': 'Rental option: one-time setup cost',
   'rental.monthlyRentIncome': 'Rental option: monthly rent income',
   'rental.annualRentIncrease': 'Rental option: annual rent increase (%)',
   'rental.monthlyMaintenanceRate': 'Rental option: maintenance rate (%)',
   'rental.extraPrincipalDuringRental': 'Rental option: extra principal during rental',
   'rental.sellAge': 'Rental option: sell rental at age',
+
+  'newHome.enabled': 'New home: enabled',
+  'newHome.purchaseAge': 'New home: purchase age',
+  'newHome.price': 'New home: purchase price',
+  'newHome.downPayment': 'New home: down payment',
+  'newHome.apr': 'New home: mortgage APR (%)',
+  'newHome.loanTermYears': 'New home: mortgage term (years)',
+  'newHome.appreciationRate': 'New home: appreciation rate (%)',
+  'newHome.maintenanceRate': 'New home: maintenance rate (%)',
+  'newHome.sellAge': 'New home: sell at age',
+  'newHome.saleFeeRate': 'New home: sale fee rate (%)',
 
   'monteCarlo.enabled': 'Monte Carlo: enabled',
   'monteCarlo.runs': 'Monte Carlo: runs',
@@ -137,7 +149,7 @@ const STATIC_IGNORE_KEYS = new Set(['scenarios']);
 // snapshots. Sub-field changes (eventAge, expenseFactor, ...) don't actually
 // move the result when the feature is disabled, so showing them as
 // "input changes" is confusing.
-const TOGGLEABLE_FEATURES = ['survivor', 'japan', 'monteCarlo', 'rental'];
+const TOGGLEABLE_FEATURES = ['survivor', 'japan', 'monteCarlo', 'rental', 'newHome'];
 
 // Deep walk two objects and return a list of every leaf-level difference.
 // Each entry: { path, prev, curr }.
