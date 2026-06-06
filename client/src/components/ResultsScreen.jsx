@@ -251,7 +251,7 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
               label="My Current Age"
               value={myCurrentAge ?? '—'}
               sub={wifeLifeExp
-                ? `Life exp: me ${lifeExp} · wife ${wifeLifeExp} (survivor)`
+                ? `Life exp: me ${lifeExp} · spouse ${wifeLifeExp} (survivor)`
                 : `Life expectancy: ${lifeExp}`}
             />
             <SummaryCard
@@ -567,7 +567,7 @@ function AssetLifelineTable({ rows, retireAge, lifeExp }) {
                 <span>
                   Age {age}
                   {r.wifeAge !== undefined && r.wifeAge !== age && (
-                    <span className="lifeline-wife-age"> · wife {r.wifeAge}</span>
+                    <span className="lifeline-wife-age"> · spouse {r.wifeAge}</span>
                   )}
                 </span>
                 {isRetire && <span className="tag tag-retire">Retire</span>}

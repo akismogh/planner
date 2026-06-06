@@ -474,13 +474,17 @@ export function simulate(inputs, overrides = {}, options = {}) {
     // Working income grows by `incomeGrowth` per year (NOT necessarily the
     // same as price inflation). SS keeps using the inflation factor because
     // SSA actually applies COLA increases tied to CPI.
+    // Income inputs are PRE-TAX (gross). Multiply by (1 − taxRate) to get
+    // spendable take-home. The simulator's cash flow uses take-home.
     const incomeFactor = Math.pow(1 + incomeGrowth, yo);
+    const myAfterTaxFactor = 1 - (Number(inputs.income.myTaxRate) || 0) / 100;
+    const wifeAfterTaxFactor = 1 - (Number(inputs.income.wifeTaxRate) || 0) / 100;
     const myIncome = isMeDeceased
       ? 0
-      : (myAge < myRetireAge ? (Number(inputs.income.myIncome) || 0) * 12 * incomeFactor : 0);
+      : (myAge < myRetireAge ? (Number(inputs.income.myIncome) || 0) * 12 * incomeFactor * myAfterTaxFactor : 0);
     const wifeIncome = isWifeDeceased
       ? 0
-      : (wifeAge < wifeRetireAge ? (Number(inputs.income.wifeIncome) || 0) * 12 * incomeFactor : 0);
+      : (wifeAge < wifeRetireAge ? (Number(inputs.income.wifeIncome) || 0) * 12 * incomeFactor * wifeAfterTaxFactor : 0);
 
     // Each spouse's OWN benefit (with their own claim-age adjustment).
     const myOwn =

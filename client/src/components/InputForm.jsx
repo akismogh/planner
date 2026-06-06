@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { calcLoanPayment, calcTotalInterest, ageFromDOB } from '../utils/calculations.js';
 import { isBrowserStorage, exportDataToFile, importDataFromFile } from '../api.js';
-import { useT } from '../i18n.jsx';
+import { useT, useUITranslate } from '../i18n.jsx';
 // (calcTotalInterest is used by both Loan and Vehicle tables to display
 // the amortization total interest column live as the user types.)
 
@@ -34,8 +34,12 @@ export function defaultInputs() {
       autoDepleteRetirement: false,
     },
     income: {
+      // myIncome / wifeIncome are now PRE-TAX (gross) monthly amounts.
+      // The simulator multiplies by (1 − taxRate) to get spendable take-home.
       myIncome: 0,
+      myTaxRate: 25,
       wifeIncome: 0,
+      wifeTaxRate: 25,
       myRetirementAge: 65,
       wifeRetirementAge: 65,
       // Annual nominal growth of working income (raises + COLA).
@@ -44,9 +48,9 @@ export function defaultInputs() {
       // Set higher than inflation for career growth.
       incomeGrowthRate: 3.0,
     },
+    // Start with ONE row in each repeatable section; users add more with the
+    // "Add" buttons. Avoids a wall of blank rows that don't affect the calc.
     banks: [
-      { nickname: '', balance: 0, growthRate: 2.0 },
-      { nickname: '', balance: 0, growthRate: 2.0 },
       { nickname: '', balance: 0, growthRate: 2.0 },
     ],
     // Auto-invest excess bank cash: when enabled, any bank total above
@@ -76,15 +80,11 @@ export function defaultInputs() {
     // IRS 59½ threshold to avoid the 10% early-withdrawal penalty).
     iras: [
       { nickname: '', balance: 0, monthlyContrib: 0, growthRate: 7.0, stopContribAge: 65, accountType: 'traditional', withdrawalTaxRate: 22, earliestWithdrawalAge: 60 },
-      { nickname: '', balance: 0, monthlyContrib: 0, growthRate: 7.0, stopContribAge: 65, accountType: 'traditional', withdrawalTaxRate: 22, earliestWithdrawalAge: 60 },
-      { nickname: '', balance: 0, monthlyContrib: 0, growthRate: 7.0, stopContribAge: 65, accountType: 'traditional', withdrawalTaxRate: 22, earliestWithdrawalAge: 60 },
     ],
     // companyMonthlyMatch: employer match in DOLLARS per month (not a percent).
     // E.g. if you contribute $500/mo and employer matches dollar-for-dollar, enter 500.
     // If they match 50% of yours, enter 250. If no match, 0.
     k401s: [
-      { nickname: '', balance: 0, monthlyContrib: 0, companyMonthlyMatch: 0, growthRate: 7.0, stopContribAge: 65, accountType: 'traditional', withdrawalTaxRate: 22, earliestWithdrawalAge: 60 },
-      { nickname: '', balance: 0, monthlyContrib: 0, companyMonthlyMatch: 0, growthRate: 7.0, stopContribAge: 65, accountType: 'traditional', withdrawalTaxRate: 22, earliestWithdrawalAge: 60 },
       { nickname: '', balance: 0, monthlyContrib: 0, companyMonthlyMatch: 0, growthRate: 7.0, stopContribAge: 65, accountType: 'traditional', withdrawalTaxRate: 22, earliestWithdrawalAge: 60 },
     ],
     realEstate: {
@@ -169,21 +169,15 @@ export function defaultInputs() {
     // 20 slots for one-time large purchases (wedding, car, renovation, etc.).
     // Amount is in today's dollars and gets inflation-adjusted to the year
     // it's spent. `enabled` toggles inclusion in the simulation.
-    oneTimeExpenses: Array.from({ length: 20 }, () => ({
-      enabled: true,
-      description: '',
-      age: 0,
-      amount: 0,
-    })),
+    oneTimeExpenses: [
+      { enabled: true, description: '', age: 0, amount: 0 },
+    ],
     // 5 slots for one-time large incomes (inheritance, asset sale, settlement,
     // bonus). Amount is in today's dollars and inflation-adjusted to the year
     // it lands. Deposited into Bank 1 in that year.
-    oneTimeIncomes: Array.from({ length: 5 }, () => ({
-      enabled: true,
-      description: '',
-      age: 0,
-      amount: 0,
-    })),
+    oneTimeIncomes: [
+      { enabled: true, description: '', age: 0, amount: 0 },
+    ],
     // 5 slots for loans (personal, HELOC, education, etc.). Each has:
     //   - description: free text (e.g. "Kids' college", "Kitchen reno HELOC")
     //   - person: 'self' or 'wife' (informational)
@@ -194,17 +188,11 @@ export function defaultInputs() {
     // Loan proceeds (the principal) are deposited into Bank 1 at start age.
     // Monthly payment is calculated via standard amortization formula and
     // deducted from cash flow every month for `durationYears * 12` months.
-    loans: Array.from({ length: 5 }, () => ({
+    loans: [
       // Enabled toggle (default true) lets you keep loan parameters defined
       // but turn the loan on/off for the simulation without losing data.
-      enabled: true,
-      description: '',
-      person: 'self',
-      age: 0,
-      amount: 0,
-      durationYears: 0,
-      apr: 0,
-    })),
+      { enabled: true, description: '', person: 'self', age: 0, amount: 0, durationYears: 0, apr: 0 },
+    ],
     // 8 slots for vehicle purchases (cars / motorcycles). Each purchase has:
     //   - description: 'car' or 'motorcycle'
     //   - person: 'self' or 'wife'
@@ -216,15 +204,9 @@ export function defaultInputs() {
     // Monthly payment is AUTO-CALCULATED from (cost - down), months, APR
     // using the standard amortization formula. All amounts in today's
     // dollars; inflation factor locks at the purchase year.
-    vehicles: Array.from({ length: 8 }, () => ({
-      description: 'car',
-      person: 'self',
-      age: 0,
-      cost: 0,
-      down: 0,
-      monthsToPay: 0,
-      apr: 0,
-    })),
+    vehicles: [
+      { description: 'car', person: 'self', age: 0, cost: 0, down: 0, monthsToPay: 0, apr: 0 },
+    ],
     // ── Japan relocation ──
     // When enabled, at moveAge:
     //  - Living expenses get multiplied by `costMultiplier` (Japan typically
@@ -313,6 +295,9 @@ function emptyLoan() {
 function emptyVehicle() {
   return { description: 'car', person: 'self', age: 0, cost: 0, down: 0, monthsToPay: 0, apr: 0 };
 }
+function emptyBank() {
+  return { nickname: '', balance: 0, growthRate: 2.0 };
+}
 function emptyBracketRow() {
   return { fromAge: 0, toAge: 0, ...emptyBracket() };
 }
@@ -330,13 +315,14 @@ function formatAdjusted(fraAmount, age) {
 // onChange still writes 0 to state when the field is cleared, so calculations
 // always have a number to work with.
 function NumberField({ label, value, onChange, hint, step = 1, required, placeholder }) {
+  const tr = useUITranslate();
   const display =
     value === 0 || value === null || value === undefined || value === '' ? '' : value;
   return (
     <label className={`field${required ? ' required' : ''}`}>
       <span className="field-label">
-        {label}{required && <span className="req-star"> *</span>}
-        {hint && <em className="hint"> — {hint}</em>}
+        {tr(label)}{required && <span className="req-star"> *</span>}
+        {hint && <em className="hint"> — {tr(hint)}</em>}
       </span>
       <input
         type="number"
@@ -354,12 +340,13 @@ function NumberField({ label, value, onChange, hint, step = 1, required, placeho
 // (preserving string vs number type). Without this, picking "Roth" would
 // become Number('roth') = NaN and snap back to the first option.
 function SelectField({ label, value, onChange, options, hint, required }) {
+  const tr = useUITranslate();
   const stringValue = value === null || value === undefined ? '' : String(value);
   return (
     <label className={`field${required ? ' required' : ''}`}>
       <span className="field-label">
-        {label}{required && <span className="req-star"> *</span>}
-        {hint && <em className="hint"> — {hint}</em>}
+        {tr(label)}{required && <span className="req-star"> *</span>}
+        {hint && <em className="hint"> — {tr(hint)}</em>}
       </span>
       <select
         value={stringValue}
@@ -370,7 +357,7 @@ function SelectField({ label, value, onChange, options, hint, required }) {
         }}
       >
         {options.map((opt) => (
-          <option key={String(opt.value)} value={String(opt.value)}>{opt.label}</option>
+          <option key={String(opt.value)} value={String(opt.value)}>{tr(opt.label)}</option>
         ))}
       </select>
     </label>
@@ -402,11 +389,12 @@ export const SS_AGE_OPTIONS = Object.entries(SS_FACTORS).map(([age, factor]) => 
 });
 
 function TextField({ label, value, onChange, hint }) {
+  const tr = useUITranslate();
   return (
     <label className="field">
       <span className="field-label">
-        {label}
-        {hint && <em className="hint"> — {hint}</em>}
+        {tr(label)}
+        {hint && <em className="hint"> — {tr(hint)}</em>}
       </span>
       <input type="text" value={value ?? ''} onChange={(e) => onChange(e.target.value)} />
     </label>
@@ -414,14 +402,31 @@ function TextField({ label, value, onChange, hint }) {
 }
 
 function DateField({ label, value, onChange, required }) {
+  const tr = useUITranslate();
   return (
     <label className={`field${required ? ' required' : ''}`}>
       <span className="field-label">
-        {label}{required && <span className="req-star"> *</span>}
+        {tr(label)}{required && <span className="req-star"> *</span>}
       </span>
       <input type="date" value={value ?? ''} onChange={(e) => onChange(e.target.value)} />
     </label>
   );
+}
+
+// Read-only computed value display (e.g. estimated after-tax income).
+function ReadoutField({ label, value }) {
+  const tr = useUITranslate();
+  return (
+    <label className="field">
+      <span className="field-label">{tr(label)}</span>
+      <div className="field-readout">{value}</div>
+    </label>
+  );
+}
+
+// Compact money formatter for inline previews (no decimals).
+function fmtMoney0(n) {
+  return `$${Math.round(Number(n) || 0).toLocaleString('en-US')}`;
 }
 
 function makeSetter(setData, path) {
@@ -472,6 +477,8 @@ export default function InputForm({
   const removeRow = (key) => (idx) =>
     setData((prev) => ({ ...prev, [key]: (prev[key] || []).filter((_, i) => i !== idx) }));
 
+  const addBank = addRow('banks', emptyBank);
+  const removeBank = removeRow('banks');
   const addIRA = addRow('iras', emptyIRA);
   const removeIRA = removeRow('iras');
   const addK401 = addRow('k401s', emptyK401);
@@ -563,7 +570,7 @@ export default function InputForm({
         <div className="grid-2">
           <DateField label="My date of birth" value={data.personal.myDOB}
             onChange={set(['personal', 'myDOB'])} required />
-          <DateField label="Wife's date of birth" value={data.personal.wifeDOB}
+          <DateField label={t('lbl.spouseDOB', "Spouse's date of birth")} value={data.personal.wifeDOB}
             onChange={set(['personal', 'wifeDOB'])} required />
           <NumberField label="Life expectancy (age)" value={data.personal.lifeExpectancy}
             onChange={set(['personal', 'lifeExpectancy'])} required
@@ -589,31 +596,33 @@ export default function InputForm({
       <details open>
         <summary>{t('sec.income')}</summary>
         <p className="section-note">
-          Enter <strong>monthly take-home (after-tax)</strong> income. The simulation
-          multiplies by 12 internally and adjusts for inflation each year.<br />
-          <strong>Each year these are subtracted from total income</strong> to compute
-          net cash flow: living expenses, travel, mortgage P&amp;I, property tax,
-          maintenance, UL insurance premiums, all IRA contributions, and Roth 401k
-          contributions. Surplus flows into Bank&nbsp;1; deficit is pulled from banks
-          (down to your emergency fund), then IRAs, then 401k. Traditional 401k
-          contributions are <em>not</em> deducted because they're already excluded
-          from your after-tax take-home before you reported it.
+          {t('income.note', 'Enter PRE-TAX (gross) monthly income plus an effective tax rate. The simulator applies the tax to get spendable take-home, then adjusts for inflation each year.')}
         </p>
-        <div className="grid-2">
-          <NumberField label="My monthly after-tax income" value={data.income.myIncome}
-            onChange={set(['income', 'myIncome'])} hint="net of taxes and deductions" />
-          <NumberField label="Wife's monthly after-tax income" value={data.income.wifeIncome}
-            onChange={set(['income', 'wifeIncome'])} hint="net of taxes and deductions" />
-          <NumberField label="My retirement age" value={data.income.myRetirementAge}
+        <div className="grid-3">
+          <NumberField label={t('lbl.myGrossIncome', 'My monthly income (pre-tax)')} value={data.income.myIncome}
+            onChange={set(['income', 'myIncome'])} hint={t('hint.grossMonthly', 'gross / before taxes')} />
+          <NumberField label={t('lbl.myTaxRate', 'My effective tax rate (%)')} value={data.income.myTaxRate}
+            onChange={set(['income', 'myTaxRate'])} step={0.5}
+            hint={t('hint.taxRate', 'combined fed + state + payroll, effective')} />
+          <ReadoutField label={t('lbl.afterTax', 'Est. after-tax (monthly)')}
+            value={fmtMoney0((Number(data.income.myIncome) || 0) * (1 - (Number(data.income.myTaxRate) || 0) / 100))} />
+          <NumberField label={t('lbl.spouseGrossIncome', "Spouse's monthly income (pre-tax)")} value={data.income.wifeIncome}
+            onChange={set(['income', 'wifeIncome'])} hint={t('hint.grossMonthly', 'gross / before taxes')} />
+          <NumberField label={t('lbl.spouseTaxRate', "Spouse's effective tax rate (%)")} value={data.income.wifeTaxRate}
+            onChange={set(['income', 'wifeTaxRate'])} step={0.5}
+            hint={t('hint.taxRate', 'combined fed + state + payroll, effective')} />
+          <ReadoutField label={t('lbl.afterTax', 'Est. after-tax (monthly)')}
+            value={fmtMoney0((Number(data.income.wifeIncome) || 0) * (1 - (Number(data.income.wifeTaxRate) || 0) / 100))} />
+          <NumberField label={t('lbl.myRetireAge', 'My retirement age')} value={data.income.myRetirementAge}
             onChange={set(['income', 'myRetirementAge'])} required
-            hint="income stops; calculation also finds earliest possible age" />
-          <NumberField label="Wife's retirement age" value={data.income.wifeRetirementAge}
+            hint={t('hint.retireAge', 'income stops; calculation also finds earliest possible age')} />
+          <NumberField label={t('lbl.spouseRetireAge', "Spouse's retirement age")} value={data.income.wifeRetirementAge}
             onChange={set(['income', 'wifeRetirementAge'])} />
-          <NumberField label="Annual income growth rate (%)"
+          <NumberField label={t('lbl.incomeGrowth', 'Annual income growth rate (%)')}
             value={data.income.incomeGrowthRate}
             onChange={set(['income', 'incomeGrowthRate'])}
             step={0.1}
-            hint="how much your salary grows year-over-year. Set = inflation for COLA-matching raises; 0 for no raises; >inflation for career growth" />
+            hint={t('hint.incomeGrowth', 'salary growth per year. = inflation for COLA raises; 0 for none; >inflation for career growth')} />
         </div>
       </details>
 
@@ -683,17 +692,33 @@ export default function InputForm({
 
         {data.banks.map((b, i) => (
           <div key={i} className="card">
-            <h4>Bank Account {i + 1} <em className="hint">(leave blank if unused)</em></h4>
+            <h4 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>{t('lbl.bankAccount', 'Bank Account')} {i + 1}</span>
+              {data.banks.length > 1 && (
+                <button
+                  type="button"
+                  className="btn-danger-sm"
+                  onClick={() => removeBank(i)}
+                  title={t('btn.removeBank', 'Remove this bank account')}
+                >
+                  {t('btn.remove', '🗑 Remove')}
+                </button>
+              )}
+            </h4>
             <div className="grid-3">
-              <TextField label="Nickname" value={b.nickname}
+              <TextField label={t('lbl.nickname', 'Nickname')} value={b.nickname}
                 onChange={set(['banks', i, 'nickname'])} />
-              <NumberField label="Current balance" value={b.balance}
+              <NumberField label={t('lbl.currentBalance', 'Current balance')} value={b.balance}
                 onChange={set(['banks', i, 'balance'])} />
-              <NumberField label="Annual growth rate (%)" value={b.growthRate}
+              <NumberField label={t('lbl.annualGrowth', 'Annual growth rate (%)')} value={b.growthRate}
                 onChange={set(['banks', i, 'growthRate'])} step={0.1} />
             </div>
           </div>
         ))}
+        <button type="button" className="btn-primary-sm" onClick={addBank}
+          style={{ marginTop: 4 }}>
+          {t('btn.addBank', '＋ Add Bank Account')}
+        </button>
       </details>
 
       {/* ── Universal Life ── */}
@@ -908,7 +933,7 @@ export default function InputForm({
           </div>
         </div>
         <div className="card">
-          <h4>Wife's</h4>
+          <h4>{t('lbl.spousePossessive', "Spouse's")}</h4>
           <div className="grid-2">
             <NumberField label="Estimated monthly benefit at FRA (67)"
               value={data.ss.wifeSSAmount}
@@ -1383,7 +1408,7 @@ export default function InputForm({
                   value={loan.person || 'self'}
                   onChange={(ev) => set(['loans', i, 'person'])(ev.target.value)}>
                   <option value="self">Self</option>
-                  <option value="wife">Wife</option>
+                  <option value="wife">{t('opt.spouse', 'Spouse')}</option>
                 </select>
                 <input type="number" placeholder="age"
                   value={loan.age === 0 ? '' : loan.age}
@@ -1462,7 +1487,7 @@ export default function InputForm({
                   onChange={(ev) => set(['vehicles', i, 'person'])(ev.target.value)}
                 >
                   <option value="self">Self</option>
-                  <option value="wife">Wife</option>
+                  <option value="wife">{t('opt.spouse', 'Spouse')}</option>
                 </select>
                 <input type="number" placeholder="age"
                   value={v.age === 0 ? '' : v.age}
@@ -1515,30 +1540,30 @@ export default function InputForm({
         </p>
         <div className="card">
           <div className="grid-2">
-            <SelectField label="Enable survivor scenario"
+            <SelectField label={t('lbl.enableSurvivor', 'Enable survivor scenario')}
               value={data.survivor.enabled ? 1 : 0}
               onChange={(v) => set(['survivor', 'enabled'])(Boolean(v))}
-              options={[{ value: 0, label: 'No' }, { value: 1, label: 'Yes' }]} />
-            <SelectField label="Who passes first"
+              options={[{ value: 0, label: t('opt.no', 'No') }, { value: 1, label: t('opt.yes', 'Yes') }]} />
+            <SelectField label={t('lbl.whoFirst', 'Who passes first')}
               value={data.survivor.whoFirst ?? 'wife'}
               onChange={set(['survivor', 'whoFirst'])}
               options={[
-                { value: 'wife', label: 'Wife passes first (typical actuarial case)' },
-                { value: 'me',   label: 'I pass first' },
+                { value: 'wife', label: t('opt.spouseFirst', 'Spouse passes first (typical actuarial case)') },
+                { value: 'me',   label: t('opt.meFirst', 'I pass first') },
               ]} />
-            <NumberField label="My age when event occurs"
+            <NumberField label={t('lbl.survivorEventAge', 'My age when event occurs')}
               value={data.survivor.eventAge}
               onChange={set(['survivor', 'eventAge'])}
-              hint="age YOU would be when this happens (works for either case)" />
-            <NumberField label="Expense factor (single household)"
+              hint={t('hint.survivorEventAge', 'age YOU would be when this happens (works for either case)')} />
+            <NumberField label={t('lbl.expenseFactor', 'Expense factor (single household)')}
               value={data.survivor.expenseFactor}
               onChange={set(['survivor', 'expenseFactor'])}
               step={0.05}
-              hint="0.75 = 75% of couple's expenses; rule of thumb 0.70–0.80" />
-            <NumberField label="Wife's life expectancy (age)"
+              hint={t('hint.expenseFactor', "0.75 = 75% of couple's expenses; rule of thumb 0.70–0.80")} />
+            <NumberField label={t('lbl.spouseLifeExp', "Spouse's life expectancy (age)")}
               value={data.survivor.wifeLifeExpectancy}
               onChange={set(['survivor', 'wifeLifeExpectancy'])}
-              hint="only used if 'I pass first' — sim extends until wife reaches this age" />
+              hint={t('hint.spouseLifeExp', "only used if 'I pass first' — sim extends until spouse reaches this age")} />
           </div>
         </div>
       </details>

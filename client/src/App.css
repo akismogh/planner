@@ -1,3 +1,14 @@
+/* Read-only computed field (e.g. estimated after-tax income) */
+.field-readout {
+  padding: 7px 9px;
+  border: 1px dashed #b9c2cf;
+  border-radius: 4px;
+  background: #f3f6fa;
+  font-size: 14px;
+  font-weight: 700;
+  color: #15803d;
+}
+
 /* ── Language toggle (fixed top-right, every screen) ─────────────────────── */
 .lang-toggle {
   position: fixed;

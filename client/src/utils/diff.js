@@ -8,16 +8,18 @@
 // Top-level scalar fields get explicit labels for readability.
 const FIELD_LABELS = {
   'personal.myDOB': 'My date of birth',
-  'personal.wifeDOB': "Wife's date of birth",
+  'personal.wifeDOB': "Spouse's date of birth",
   'personal.lifeExpectancy': 'Life expectancy (age)',
   'personal.inflationRate': 'Inflation rate (%)',
   'personal.emergencyFund': 'Emergency fund',
   'personal.autoDepleteRetirement': 'Auto-deplete retirement accounts',
 
-  'income.myIncome': 'My monthly after-tax income',
-  'income.wifeIncome': "Wife's monthly after-tax income",
+  'income.myIncome': 'My monthly income (pre-tax)',
+  'income.myTaxRate': 'My effective tax rate (%)',
+  'income.wifeIncome': "Spouse's monthly income (pre-tax)",
+  'income.wifeTaxRate': "Spouse's effective tax rate (%)",
   'income.myRetirementAge': 'My retirement age',
-  'income.wifeRetirementAge': "Wife's retirement age",
+  'income.wifeRetirementAge': "Spouse's retirement age",
   'income.incomeGrowthRate': 'Annual income growth rate (%)',
 
   'bankInvest.enabled': 'Auto-invest excess cash: enabled',
@@ -42,8 +44,8 @@ const FIELD_LABELS = {
 
   'ss.mySSAmount': 'My SS monthly benefit (at FRA)',
   'ss.mySSAge': 'My SS claim age',
-  'ss.wifeSSAmount': "Wife's SS monthly benefit (at FRA)",
-  'ss.wifeSSAge': "Wife's SS claim age",
+  'ss.wifeSSAmount': "Spouse's SS monthly benefit (at FRA)",
+  'ss.wifeSSAge': "Spouse's SS claim age",
 
   'japan.enabled': 'Japan move: enabled',
   'japan.moveAge': 'Japan move: age',
@@ -54,7 +56,7 @@ const FIELD_LABELS = {
   'survivor.whoFirst': 'Survivor scenario: who passes first',
   'survivor.eventAge': 'Survivor scenario: event age',
   'survivor.expenseFactor': 'Survivor scenario: expense factor',
-  'survivor.wifeLifeExpectancy': "Survivor scenario: wife's life expectancy",
+  'survivor.wifeLifeExpectancy': "Survivor scenario: spouse's life expectancy",
 
   'rental.enabled': 'Rental option: enabled',
   'rental.startAge': 'Rental option: start renting at age',

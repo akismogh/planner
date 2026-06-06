@@ -8,8 +8,10 @@
     "autoDepleteRetirement": false
   },
   "income": {
-    "myIncome": 8000,
-    "wifeIncome": 5000,
+    "myIncome": 10500,
+    "myTaxRate": 25,
+    "wifeIncome": 6500,
+    "wifeTaxRate": 22,
     "myRetirementAge": 65,
     "wifeRetirementAge": 63,
     "incomeGrowthRate": 3.0
