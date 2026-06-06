@@ -11,10 +11,12 @@ import {
 import { fmtMoney } from '../utils/format.js';
 import { diffInputs, friendlyLabel, formatDiffValue } from '../utils/diff.js';
 import { generateInsights, summarizeImpact, withPathSetTo } from '../utils/insights.js';
+import { useT } from '../i18n.jsx';
 import ResultsTable from './ResultsTable.jsx';
 import ResultsChart from './ResultsChart.jsx';
 
 export default function ResultsScreen({ data, onBack, previousSnapshot }) {
+  const t = useT();
   const [mcResult, setMcResult] = useState(null);
   const [mcRunning, setMcRunning] = useState(false);
 
@@ -206,12 +208,12 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
   return (
     <div className="results-screen">
       <div className="results-header">
-        <h1>Retirement Projection</h1>
+        <h1>{t('res.title')}</h1>
         <button
           onClick={onBack}
           title="Return to the input form — keyboard shortcut: Ctrl + ← or Alt + ←"
         >
-          ← Back to Inputs <span className="kbd-hint">Ctrl / Alt + ←</span>
+          {t('btn.back')} <span className="kbd-hint">Ctrl / Alt + ←</span>
         </button>
       </div>
 
@@ -589,6 +591,7 @@ function AssetLifelineTable({ rows, retireAge, lifeExp }) {
 // the impact on results, AND a plain-English analysis explaining WHY each
 // change affected the outcome — with per-change attribution + cash flow.
 function ComparisonPanel({ comparison }) {
+  const t = useT();
   const { inputChanges, metrics, context, attributions } = comparison;
   const insights = generateInsights(inputChanges, metrics, context, attributions);
   const summary = summarizeImpact(metrics);
@@ -622,7 +625,7 @@ function ComparisonPanel({ comparison }) {
 
   return (
     <div className="comparison-panel">
-      <h3>🔍 What Changed Since Your Last Calculation</h3>
+      <h3>{t('res.whatChanged')}</h3>
 
       {/* Inputs side — uses the same .impact-row grid as the Impact section
           below so the Before/After columns line up vertically. */}

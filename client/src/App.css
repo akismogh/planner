@@ -1,3 +1,33 @@
+/* ── Language toggle (fixed top-right, every screen) ─────────────────────── */
+.lang-toggle {
+  position: fixed;
+  top: 10px;
+  right: 12px;
+  z-index: 1000;
+  display: flex;
+  gap: 2px;
+  background: #ffffff;
+  border: 1px solid var(--border, #d8dee9);
+  border-radius: 7px;
+  padding: 2px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+.lang-toggle button {
+  border: none;
+  background: transparent;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #5a6675;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.lang-toggle button.active {
+  background: #1f6feb;
+  color: #fff;
+}
+.lang-toggle button:not(.active):hover { background: #eef2f7; }
+
 /* Base layout — designed for a comfortable 1080p experience. */
 :root {
   --bg: #f5f7fa;

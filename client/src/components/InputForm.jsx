@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { calcLoanPayment, calcTotalInterest, ageFromDOB } from '../utils/calculations.js';
 import { isBrowserStorage, exportDataToFile, importDataFromFile } from '../api.js';
+import { useT } from '../i18n.jsx';
 // (calcTotalInterest is used by both Loan and Vehicle tables to display
 // the amortization total interest column live as the user types.)
 
@@ -447,6 +448,7 @@ export default function InputForm({
   scenarioHandlers,
   onImportData,
 }) {
+  const t = useT();
   const set = (path) => makeSetter(setData, path);
   const scenarios = data.scenarios || [null, null, null, null, null];
 
@@ -495,20 +497,16 @@ export default function InputForm({
 
   return (
     <div className="input-form">
-      <h1>Retirement Planner</h1>
+      <h1>{t('app.title')}</h1>
       {browserMode ? (
         <>
-          <p className="subtitle">
-            🔒 100% private — your data is stored only in <strong>this browser</strong> on
-            your device and is <strong>never sent to any server</strong>. Use Export to
-            back it up or move it to another computer.
-          </p>
+          <p className="subtitle">{t('app.subtitle.browser')}</p>
           <div className="data-toolbar">
             <button type="button" className="btn-data" onClick={() => exportDataToFile(data)}>
-              ⬇️ Export data (backup)
+              {t('toolbar.export')}
             </button>
             <button type="button" className="btn-data" onClick={() => importInputRef.current?.click()}>
-              ⬆️ Import data
+              {t('toolbar.import')}
             </button>
             <input
               ref={importInputRef}
@@ -517,15 +515,11 @@ export default function InputForm({
               style={{ display: 'none' }}
               onChange={handleImportFile}
             />
-            <span className="data-toolbar-note">
-              Tip: clearing your browser data will erase saved inputs — export regularly.
-            </span>
+            <span className="data-toolbar-note">{t('toolbar.note')}</span>
           </div>
         </>
       ) : (
-        <p className="subtitle">
-          Data is auto-saved every 2 seconds and stored in <code>data.json</code> in your project folder.
-        </p>
+        <p className="subtitle">{t('app.subtitle.local')}</p>
       )}
 
       {/* ── Saved scenarios bar (top of form) ── */}
@@ -556,11 +550,11 @@ export default function InputForm({
       )}
 
       {/* ── GROUP: You & Income ── */}
-      <h2 className="form-group-header">👤 You &amp; Income</h2>
+      <h2 className="form-group-header">{t('group.youIncome')}</h2>
 
       {/* ── Personal Info ── */}
       <details open>
-        <summary>Personal Info</summary>
+        <summary>{t('sec.personal')}</summary>
         <p className="section-note">
           Inflation is applied automatically to all future expenses and incomes.
           Enter all dollar amounts in <strong>today's dollars</strong>; the
@@ -593,7 +587,7 @@ export default function InputForm({
 
       {/* ── Income ── */}
       <details open>
-        <summary>Income &amp; Retirement Age</summary>
+        <summary>{t('sec.income')}</summary>
         <p className="section-note">
           Enter <strong>monthly take-home (after-tax)</strong> income. The simulation
           multiplies by 12 internally and adjusts for inflation each year.<br />
@@ -624,11 +618,11 @@ export default function InputForm({
       </details>
 
       {/* ── GROUP: Savings & Investments ── */}
-      <h2 className="form-group-header">🏦 Savings &amp; Investments</h2>
+      <h2 className="form-group-header">{t('group.savings')}</h2>
 
       {/* ── Banks ── */}
       <details>
-        <summary>Bank Accounts (up to 3)</summary>
+        <summary>{t('sec.banks')}</summary>
 
         {/* ── Auto-invest excess cash ──
             Sweep idle bank cash above a threshold into investments earning a
@@ -704,7 +698,7 @@ export default function InputForm({
 
       {/* ── Universal Life ── */}
       <details>
-        <summary>Universal Life Insurance</summary>
+        <summary>{t('sec.ul')}</summary>
         <div className="card">
           <div className="grid-2">
             <NumberField label="Current surrender value" value={data.ul.surrenderValue}
@@ -754,7 +748,7 @@ export default function InputForm({
 
       {/* ── IRAs ── */}
       <details>
-        <summary>IRA Accounts</summary>
+        <summary>{t('sec.iras')}</summary>
         <p className="section-note">
           <strong>Traditional</strong>: contributions are post-tax (already excluded
           from your take-home if you're auto-funding it), withdrawals are taxed. RMDs
@@ -820,7 +814,7 @@ export default function InputForm({
 
       {/* ── 401ks ── */}
       <details>
-        <summary>401k Accounts</summary>
+        <summary>{t('sec.k401s')}</summary>
         <p className="section-note">
           <strong>Traditional 401k</strong>: pre-tax payroll deduction — NOT subtracted
           again from your after-tax take-home; withdrawals are taxed. RMDs at 73.<br />
@@ -884,7 +878,7 @@ export default function InputForm({
 
       {/* ── Social Security (last in Savings & Investments) ── */}
       <details>
-        <summary>Social Security</summary>
+        <summary>{t('sec.ss')}</summary>
         <p className="section-note">
           Enter the monthly benefit your SSA statement projects at <strong>Full Retirement
           Age (67)</strong>. Choosing a different claim age automatically scales the
@@ -929,11 +923,11 @@ export default function InputForm({
       </details>
 
       {/* ── GROUP: Home & Property ── */}
-      <h2 className="form-group-header">🏠 Home &amp; Property</h2>
+      <h2 className="form-group-header">{t('group.home')}</h2>
 
       {/* ── Real Estate ── */}
       <details>
-        <summary>Real Estate / Home</summary>
+        <summary>{t('sec.realEstate')}</summary>
         <div className="card">
           <div className="grid-2">
             <NumberField label="Estimated current value" value={data.realEstate.value}
@@ -968,7 +962,7 @@ export default function InputForm({
 
       {/* ── Home Rental Option ── */}
       <details>
-        <summary>🏘️ Home Rental Option (alternative to selling)</summary>
+        <summary>{t('sec.rental')}</summary>
         <p className="section-note">
           Instead of selling outright, rent the house out starting on your
           <strong> retirement birthday</strong> (age {data.income.myRetirementAge || '—'}).
@@ -1021,7 +1015,7 @@ export default function InputForm({
 
       {/* ── New Home Purchase ── */}
       <details>
-        <summary>🏠 New Home Purchase (move-up / second home)</summary>
+        <summary>{t('sec.newHome')}</summary>
         <p className="section-note">
           Buy a new primary residence at a chosen age — e.g. while you rent out the
           current house. The <strong>price is what you actually pay that year</strong>
@@ -1085,11 +1079,11 @@ export default function InputForm({
       </details>
 
       {/* ── GROUP: Spending & One-Time Events ── */}
-      <h2 className="form-group-header">💸 Spending &amp; One-Time Events</h2>
+      <h2 className="form-group-header">{t('group.spending')}</h2>
 
       {/* ── Expense Brackets ── */}
       <details>
-        <summary>Monthly Living Costs by Age Range <em className="hint"> — required</em></summary>
+        <summary>{t('sec.brackets')} <em className="hint">{t('sec.required')}</em></summary>
         <p className="section-note">
           Define as many custom age ranges as you need. Inflation is applied automatically.
           If ranges overlap, the first match wins. If there's a gap, the nearest
@@ -1155,7 +1149,7 @@ export default function InputForm({
 
       {/* ── One-Time Expenses ── */}
       <details>
-        <summary>💸 One-Time Large Expenses</summary>
+        <summary>{t('sec.oneTimeExp')}</summary>
         <p className="section-note">
           Plan for big lumpy costs — wedding gifts, a new car, kitchen renovation,
           a special trip, college tuition, RV. Enter amounts in today's dollars
@@ -1263,7 +1257,7 @@ export default function InputForm({
 
       {/* ── One-Time Incomes ── */}
       <details>
-        <summary>💰 One-Time Large Incomes</summary>
+        <summary>{t('sec.oneTimeInc')}</summary>
         <p className="section-note">
           Big lumpy windfalls — inheritance, sale of a business or asset, lawsuit
           settlement, signing bonus. Amounts in today's dollars (inflated to the
@@ -1345,7 +1339,7 @@ export default function InputForm({
 
       {/* ── Loans ── */}
       <details>
-        <summary>🏦 Loans</summary>
+        <summary>{t('sec.loans')}</summary>
         <p className="section-note">
           Personal loans, HELOC, education loans, etc. The principal is deposited
           into Bank 1 at the start age (so use this in conjunction with a one-time
@@ -1423,7 +1417,7 @@ export default function InputForm({
 
       {/* ── Vehicle Purchases ── */}
       <details>
-        <summary>🚗 Vehicle Purchases</summary>
+        <summary>{t('sec.vehicles')}</summary>
         <p className="section-note">
           Plan for cars and motorcycles. Enter <strong>cost, down, months, and APR</strong> —
           the monthly payment is auto-calculated using the standard amortization
@@ -1508,11 +1502,11 @@ export default function InputForm({
           adjustment card inside Monthly Living Costs by Age Range. */}
 
       {/* ── GROUP: Scenarios & Risk ── */}
-      <h2 className="form-group-header">🔮 Scenarios &amp; Risk</h2>
+      <h2 className="form-group-header">{t('group.scenarios')}</h2>
 
       {/* ── Survivor scenario ── */}
       <details>
-        <summary>🕯️ Survivor Scenario (optional)</summary>
+        <summary>{t('sec.survivor')}</summary>
         <p className="section-note">
           Models the financial impact when one spouse passes away. The surviving
           spouse keeps the LARGER of the two Social Security checks (SSA survivor
@@ -1551,7 +1545,7 @@ export default function InputForm({
 
       {/* ── Monte Carlo ── */}
       <details>
-        <summary>🎲 Monte Carlo Risk Analysis (optional)</summary>
+        <summary>{t('sec.monteCarlo')}</summary>
         <p className="section-note">
           Re-runs the simulation many times with randomized returns to estimate the
           probability your plan survives. A "85% success rate" means 85% of randomized
@@ -1587,19 +1581,19 @@ export default function InputForm({
           title="Save inputs to data.json without running the calculation"
         >
           {saving
-            ? 'Saving…'
+            ? t('btn.saving')
             : saveStatus === 'ok'
-              ? '✓ Saved'
+              ? t('btn.saved')
               : saveStatus === 'error'
-                ? '⚠ Retry'
-                : '💾  Save'}
+                ? t('btn.retry')
+                : t('btn.save')}
         </button>
         <button
           className="btn-calculate primary"
           onClick={onCalculate}
           title="Validate inputs and show the Results screen — keyboard shortcut: Ctrl + → or Alt + →"
         >
-          📊  Calculate <span className="kbd-hint">Ctrl / Alt + →</span>
+          {t('btn.calculate')} <span className="kbd-hint">Ctrl / Alt + →</span>
         </button>
       </div>
     </div>

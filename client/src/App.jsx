@@ -2,6 +2,30 @@ import React, { useEffect, useState, useCallback } from 'react';
 import InputForm, { defaultInputs } from './components/InputForm.jsx';
 import ResultsScreen from './components/ResultsScreen.jsx';
 import { loadData, saveData } from './api.js';
+import { useLang } from './i18n.jsx';
+
+// Fixed language toggle shown at the top-right on every screen.
+function LanguageToggle() {
+  const { lang, setLang } = useLang();
+  return (
+    <div className="lang-toggle" role="group" aria-label="Language">
+      <button
+        className={lang === 'en' ? 'active' : ''}
+        onClick={() => setLang('en')}
+        type="button"
+      >
+        EN
+      </button>
+      <button
+        className={lang === 'ja' ? 'active' : ''}
+        onClick={() => setLang('ja')}
+        type="button"
+      >
+        日本語
+      </button>
+    </div>
+  );
+}
 
 // localStorage key for the "what did I look like at the last Calculate?" snapshot
 const SNAPSHOT_KEY = 'retirementApp.lastCalcSnapshot';
@@ -251,15 +275,20 @@ export default function App() {
 
   if (view === 'results') {
     return (
-      <ResultsScreen
-        data={data}
-        onBack={() => setView('input')}
-        previousSnapshot={previousSnapshot}
-      />
+      <>
+        <LanguageToggle />
+        <ResultsScreen
+          data={data}
+          onBack={() => setView('input')}
+          previousSnapshot={previousSnapshot}
+        />
+      </>
     );
   }
 
   return (
+    <>
+    <LanguageToggle />
     <InputForm
       data={data}
       setData={setData}
@@ -277,6 +306,7 @@ export default function App() {
       }}
       onImportData={onImportData}
     />
+    </>
   );
 }
 
