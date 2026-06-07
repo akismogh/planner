@@ -461,6 +461,8 @@ export default function InputForm({
   validationErrors,
   scenarioHandlers,
   onImportData,
+  loadedScenarioSlot,
+  onDismissLoadedSummary,
 }) {
   const t = useT();
   const tr = useUITranslate();
@@ -555,6 +557,14 @@ export default function InputForm({
           ))}
         </div>
       </div>
+
+      {/* ── Key-settings recap after loading a scenario ── */}
+      {loadedScenarioSlot != null && scenarios[loadedScenarioSlot] && (
+        <LoadedSummary
+          scenario={scenarios[loadedScenarioSlot]}
+          onDismiss={onDismissLoadedSummary}
+        />
+      )}
 
       {/* ── Validation errors ── */}
       {validationErrors.length > 0 && (
@@ -1553,6 +1563,99 @@ export default function InputForm({
         >
           {t('btn.calculate')} <span className="kbd-hint">Ctrl / Alt + →</span>
         </button>
+      </div>
+    </div>
+  );
+}
+
+// SummaryItem: one labeled key/value cell in the LoadedSummary grid.
+function SummaryItem({ label, value }) {
+  return (
+    <div className="loaded-summary-item">
+      <span className="loaded-summary-key">{label}</span>
+      <span className="loaded-summary-val">{value}</span>
+    </div>
+  );
+}
+
+// LoadedSummary: a read-only recap of the core plan settings, shown right
+// after a scenario is loaded so you can confirm what got applied without
+// expanding every section. Reads from the SAVED scenario snapshot (not live
+// edits), so it faithfully reflects what was loaded.
+function LoadedSummary({ scenario, onDismiss }) {
+  const t = useT();
+  const { lang } = useLang();
+  const d = scenario?.data;
+  if (!d) return null;
+
+  const p = d.personal || {};
+  const inc = d.income || {};
+
+  // Current age shown next to each DOB, mirroring the DateField wording.
+  const ageNote = (dob) => {
+    const a = ageFromDOB(dob);
+    if (!a) return '';
+    return lang === 'ja' ? `（現在 ${a}歳）` : `(currently ${a})`;
+  };
+
+  const bankTotal = (d.banks || []).reduce((s, b) => s + (Number(b.balance) || 0), 0);
+  const retireTotal =
+    (d.iras || []).reduce((s, a) => s + (Number(a.balance) || 0), 0) +
+    (d.k401s || []).reduce((s, a) => s + (Number(a.balance) || 0), 0);
+
+  // Spouse retirement age: either the explicit field, or "same time as me"
+  // with the computed age when "spouse retires when I do" is on.
+  const spouseRetire = inc.wifeRetireWithMe
+    ? (() => {
+        const myA = ageFromDOB(p.myDOB);
+        const spA = ageFromDOB(p.wifeDOB);
+        const myRet = Number(inc.myRetirementAge) || 0;
+        const computed = myA && spA && myRet ? myRet - (myA - spA) : '—';
+        return `${computed} (${t('summary.sameAsMe')})`;
+      })()
+    : (inc.wifeRetirementAge || '—');
+
+  const scenarioChips = [
+    d.japan?.enabled && t('summary.chip.relocation'),
+    d.rental?.enabled && t('summary.chip.rental'),
+    d.survivor?.enabled && t('summary.chip.survivor'),
+    d.monteCarlo?.enabled && t('summary.chip.monteCarlo'),
+  ].filter(Boolean);
+
+  return (
+    <div className="loaded-summary">
+      <div className="loaded-summary-head">
+        <div className="loaded-summary-title">
+          {t('summary.heading')}
+          {scenario.name && <span className="loaded-summary-name"> · {scenario.name}</span>}
+        </div>
+        <button
+          type="button"
+          className="loaded-summary-x"
+          onClick={onDismiss}
+          title={t('summary.dismiss')}
+          aria-label={t('summary.dismiss')}
+        >
+          ×
+        </button>
+      </div>
+      <div className="loaded-summary-grid">
+        <SummaryItem label={t('summary.myDOB')} value={`${p.myDOB || '—'} ${ageNote(p.myDOB)}`} />
+        <SummaryItem label={t('summary.spouseDOB')} value={`${p.wifeDOB || '—'} ${ageNote(p.wifeDOB)}`} />
+        <SummaryItem label={t('summary.myRetireAge')} value={inc.myRetirementAge || '—'} />
+        <SummaryItem label={t('summary.spouseRetireAge')} value={spouseRetire} />
+        <SummaryItem label={t('summary.lifeExp')} value={p.lifeExpectancy || '—'} />
+        <SummaryItem label={t('summary.inflation')} value={`${p.inflationRate ?? '—'}%`} />
+        <SummaryItem label={t('summary.bankTotal')} value={fmtMoney0(bankTotal)} />
+        <SummaryItem label={t('summary.retireTotal')} value={fmtMoney0(retireTotal)} />
+      </div>
+      <div className="loaded-summary-scenarios">
+        <span className="loaded-summary-sclabel">{t('summary.scenarios')}:</span>
+        {scenarioChips.length > 0
+          ? scenarioChips.map((c, i) => (
+              <span key={i} className="loaded-summary-chip">{c}</span>
+            ))
+          : <span className="loaded-summary-none">{t('summary.none')}</span>}
       </div>
     </div>
   );

@@ -41,6 +41,10 @@ export default function App() {
   // Snapshot from the LAST time Calculate was clicked. Lets the results
   // screen show "what changed since last calc" + impact diff.
   const [previousSnapshot, setPreviousSnapshot] = useState(null);
+  // Which scenario slot was just loaded (null = none). Drives the read-only
+  // "key settings" recap card shown at the top of the form after a Load, so
+  // you can confirm at a glance what got applied.
+  const [loadedScenarioSlot, setLoadedScenarioSlot] = useState(null);
 
   // Load the last snapshot from localStorage on mount so comparison
   // survives across browser sessions.
@@ -187,6 +191,8 @@ export default function App() {
       // scenarios array (otherwise loading would wipe the list).
       return { ...sc.data, scenarios: prev.scenarios };
     });
+    // Surface a read-only recap of the key settings that just loaded.
+    setLoadedScenarioSlot(slotIdx);
   }, []);
 
   const updateScenarioInSlot = useCallback((slotIdx) => {
@@ -220,6 +226,8 @@ export default function App() {
       newScenarios[slotIdx] = null;
       return { ...prev, scenarios: newScenarios };
     });
+    // If we just deleted the slot whose recap is showing, hide the recap.
+    setLoadedScenarioSlot((cur) => (cur === slotIdx ? null : cur));
   }, []);
 
   // ── Import data from a user-selected JSON file (public build backup) ──────
@@ -306,6 +314,8 @@ export default function App() {
         delete: deleteScenarioFromSlot,
       }}
       onImportData={onImportData}
+      loadedScenarioSlot={loadedScenarioSlot}
+      onDismissLoadedSummary={() => setLoadedScenarioSlot(null)}
     />
     </>
   );
