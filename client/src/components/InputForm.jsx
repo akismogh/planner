@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { calcLoanPayment, calcTotalInterest, ageFromDOB } from '../utils/calculations.js';
 import { isBrowserStorage, exportDataToFile, importDataFromFile } from '../api.js';
-import { useT, useUITranslate } from '../i18n.jsx';
+import { useT, useUITranslate, useLang } from '../i18n.jsx';
 // (calcTotalInterest is used by both Loan and Vehicle tables to display
 // the amortization total interest column live as the user types.)
 
@@ -403,10 +403,16 @@ function TextField({ label, value, onChange, hint }) {
 
 function DateField({ label, value, onChange, required }) {
   const tr = useUITranslate();
+  const { lang } = useLang();
+  // Live current age derived from the entered date of birth (hidden until a
+  // valid date is entered).
+  const age = ageFromDOB(value);
+  const ageText = lang === 'ja' ? `現在 ${age}歳` : `currently ${age}`;
   return (
     <label className={`field${required ? ' required' : ''}`}>
       <span className="field-label">
         {tr(label)}{required && <span className="req-star"> *</span>}
+        {age > 0 && <em className="hint"> — {ageText}</em>}
       </span>
       <input type="date" value={value ?? ''} onChange={(e) => onChange(e.target.value)} />
     </label>

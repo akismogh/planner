@@ -47,7 +47,7 @@ const STRINGS = {
   // Section summaries
   'sec.personal':    { en: 'Personal Info',               ja: '基本情報' },
   'sec.income':      { en: 'Income & Retirement Age',     ja: '収入・退職年齢' },
-  'sec.banks':       { en: 'Bank Accounts (up to 3)',     ja: '銀行口座（最大3）' },
+  'sec.banks':       { en: 'Bank Accounts',               ja: '銀行口座' },
   'sec.ul':          { en: 'Universal Life Insurance',    ja: '終身保険（UL）' },
   'sec.iras':        { en: 'IRA Accounts',                ja: 'IRA口座' },
   'sec.k401s':       { en: '401k Accounts',               ja: '401k口座' },

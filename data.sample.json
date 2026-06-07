@@ -119,21 +119,11 @@
     { "enabled": true, "description": "", "age": 0, "amount": 0 }
   ],
   "loans": [
-    { "enabled": true, "description": "Kids' college", "person": "self", "age": 60, "amount": 60000, "durationYears": 10, "apr": 6.5 },
-    { "enabled": true, "description": "", "person": "self", "age": 0, "amount": 0, "durationYears": 0, "apr": 0 },
-    { "enabled": true, "description": "", "person": "self", "age": 0, "amount": 0, "durationYears": 0, "apr": 0 },
-    { "enabled": true, "description": "", "person": "self", "age": 0, "amount": 0, "durationYears": 0, "apr": 0 },
-    { "enabled": true, "description": "", "person": "self", "age": 0, "amount": 0, "durationYears": 0, "apr": 0 }
+    { "enabled": true, "description": "Kids' college", "person": "self", "age": 60, "amount": 60000, "durationYears": 10, "apr": 6.5 }
   ],
   "vehicles": [
     { "description": "car", "person": "self", "age": 60, "cost": 40000, "down": 10000, "monthsToPay": 60, "apr": 6.0 },
-    { "description": "car", "person": "wife", "age": 66, "cost": 35000, "down": 35000, "monthsToPay": 0, "apr": 0 },
-    { "description": "car", "person": "self", "age": 0, "cost": 0, "down": 0, "monthsToPay": 0, "apr": 0 },
-    { "description": "car", "person": "self", "age": 0, "cost": 0, "down": 0, "monthsToPay": 0, "apr": 0 },
-    { "description": "car", "person": "self", "age": 0, "cost": 0, "down": 0, "monthsToPay": 0, "apr": 0 },
-    { "description": "car", "person": "self", "age": 0, "cost": 0, "down": 0, "monthsToPay": 0, "apr": 0 },
-    { "description": "car", "person": "self", "age": 0, "cost": 0, "down": 0, "monthsToPay": 0, "apr": 0 },
-    { "description": "car", "person": "self", "age": 0, "cost": 0, "down": 0, "monthsToPay": 0, "apr": 0 }
+    { "description": "car", "person": "wife", "age": 66, "cost": 35000, "down": 35000, "monthsToPay": 0, "apr": 0 }
   ],
   "japan": {
     "enabled": false,

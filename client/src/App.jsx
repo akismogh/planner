@@ -331,6 +331,25 @@ function migrateData(saved) {
     ];
   }
 
+  // Strip fully-blank Loan / Vehicle rows carried over from older saved data
+  // (these are ignored by the calc engine anyway — this just tidies the form).
+  // If a section ends up with no real entries, keep a single blank starter row.
+  if (Array.isArray(out.loans)) {
+    const real = out.loans.filter((l) =>
+      (l.description && String(l.description).trim()) ||
+      Number(l.amount) || Number(l.age) || Number(l.durationYears) || Number(l.apr)
+    );
+    out.loans = real.length ? real : out.loans.slice(0, 1);
+  }
+  if (Array.isArray(out.vehicles)) {
+    // description defaults to 'car', so ignore it when deciding "blank".
+    const real = out.vehicles.filter((v) =>
+      Number(v.cost) || Number(v.down) || Number(v.age) ||
+      Number(v.monthsToPay) || Number(v.apr)
+    );
+    out.vehicles = real.length ? real : out.vehicles.slice(0, 1);
+  }
+
   // wifeLifeExpectancy used to live in `personal`; now it's inside `survivor`
   // because it's only relevant when the survivor scenario is enabled.
   if (out.personal && out.personal.wifeLifeExpectancy !== undefined) {
