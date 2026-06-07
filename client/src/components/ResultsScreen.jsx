@@ -224,9 +224,9 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
 
       {result.error && (
         <div className="calc-error-box">
-          <strong>Calculation error:</strong> {result.error}
+          <strong>{t('res.calcError')}</strong> {result.error}
           <br />
-          <button onClick={onBack} style={{ marginTop: 12 }}>← Back to fix inputs</button>
+          <button onClick={onBack} style={{ marginTop: 12 }}>{t('res.backToFix')}</button>
         </div>
       )}
 
@@ -253,38 +253,38 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
           {/* ── Top summary ── */}
           <div className="summary-banner">
             <SummaryCard
-              label="My Current Age"
+              label={t('res.curAge')}
               value={myCurrentAge ?? '—'}
               sub={wifeLifeExp
-                ? `Life exp: me ${lifeExp} · spouse ${wifeLifeExp} (survivor)`
-                : `Life expectancy: ${lifeExp}`}
+                ? `${t('res.lifeExpLabel')}: ${t('res.me')} ${lifeExp} · ${t('res.spouseWord')} ${wifeLifeExp} (${t('res.survivorWord')})`
+                : `${t('res.lifeExpLabel')}: ${lifeExp}`}
             />
             <SummaryCard
-              label="Planned Retirement"
+              label={t('res.plannedRetire')}
               value={data.income.myRetirementAge}
-              sub="income stops at this age"
+              sub={t('res.incomeStops')}
             />
             <SummaryCard
-              label="Earliest Possible Retirement"
+              label={t('res.earliestRetire')}
               value={result.possibleAge ?? '—'}
-              sub={result.possibleAge ? 'savings cover all costs' : 'not achievable on current savings'}
+              sub={result.possibleAge ? t('res.savingsCover') : t('res.notAchievable')}
               highlight={!!result.possibleAge}
             />
             <SummaryCard
-              label="Total Assets at Planned Retirement"
+              label={t('res.totalAtRetire')}
               value={result.netWorthAtRetirement !== null ? fmtMoney(result.netWorthAtRetirement) : '—'}
-              sub={result.netWorthAtRetirement === null ? 'age outside projection' : ''}
+              sub={result.netWorthAtRetirement === null ? t('res.ageOutside') : ''}
             />
             <SummaryCard
-              label="Money Lasts?"
-              value={moneyLasts ? 'Yes ✓' : 'No ✗'}
+              label={t('res.moneyLasts')}
+              value={moneyLasts ? t('res.yes') : t('res.no')}
               sub={moneyLasts
-                ? `cash covers expenses through age ${projectionEndAge}${
+                ? `${t('res.cashCovers')} ${projectionEndAge}${
                     survivorMeFirst && wifeLifeExp
-                      ? ` (wife ${wifeLifeExp})`
+                      ? ` (${t('res.wifeWord')} ${wifeLifeExp})`
                       : ''
                   }`
-                : `bank cash runs out at age ${result.moneyRunOutAge} (would need to tap retirement accounts beyond this)`}
+                : `${t('res.bankRunsOut')} ${result.moneyRunOutAge} ${t('res.wouldNeedTap')}`}
               danger={!moneyLasts}
             />
           </div>
@@ -292,57 +292,50 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
           {/* Second row of cards — cash visibility */}
           <div className="summary-banner">
             <SummaryCard
-              label="Bank Total — Today"
+              label={t('res.bankToday')}
               value={result.bankCurrent !== null ? fmtMoney(result.bankCurrent) : '—'}
-              sub="sum of all bank accounts now"
+              sub={t('res.sumBanksNow')}
             />
             <SummaryCard
-              label="Bank Total at Retirement"
+              label={t('res.bankAtRetire')}
               value={result.bankAtRetirement !== null ? fmtMoney(result.bankAtRetirement) : '—'}
-              sub="cash on hand when income stops"
+              sub={t('res.cashWhenStops')}
               highlight={result.bankAtRetirement !== null && result.bankAtRetirement > 0}
               danger={result.bankAtRetirement !== null && result.bankAtRetirement < 0}
             />
             <SummaryCard
-              label={`Money Left at Age ${projectionEndAge} — Planned`}
+              label={`${t('res.moneyLeftAtAge')} ${projectionEndAge} — ${t('res.planned')}`}
               value={result.endingNetWorthPlanned !== null ? fmtMoney(result.endingNetWorthPlanned) : '—'}
-              sub={`if you retire at ${data.income.myRetirementAge}`}
+              sub={`${t('res.ifRetireAt')} ${data.income.myRetirementAge}`}
               highlight={result.endingNetWorthPlanned !== null && result.endingNetWorthPlanned > 0}
               danger={result.endingNetWorthPlanned !== null && result.endingNetWorthPlanned <= 0}
             />
             <SummaryCard
-              label={`Money Left at Age ${projectionEndAge} — Earliest Possible`}
+              label={`${t('res.moneyLeftAtAge')} ${projectionEndAge} — ${t('res.earliestPoss')}`}
               value={result.endingNetWorthAtPossible !== null ? fmtMoney(result.endingNetWorthAtPossible) : '—'}
-              sub={result.possibleAge ? `if you retire at ${result.possibleAge} (the threshold)` : '—'}
+              sub={result.possibleAge ? `${t('res.ifRetireAt')} ${result.possibleAge} ${t('res.threshold')}` : '—'}
               danger={result.endingNetWorthAtPossible !== null && result.endingNetWorthAtPossible <= 0}
             />
           </div>
 
           {/* Explanation note */}
           <div className="endingnw-note">
-            <strong>How to read these numbers:</strong> "Money Left at Age {projectionEndAge}"
-            is your total assets (liquid accounts + home equity) at the end of the projection.
+            <strong>{t('res.howToRead')}</strong> {t('res.moneyLeftExplain')}
             {survivorMeFirst && (
-              <> Because the survivor scenario is "I pass first", the projection runs until
-              wife's life expectancy ({wifeLifeExp}) rather than mine ({lifeExp}).</>
+              <> {t('res.survivorClause')} ({t('res.spouseWord')} {wifeLifeExp} / {t('res.me')} {lifeExp})</>
             )}
             <ul>
-              <li>If you retire at <strong>your planned age ({data.income.myRetirementAge})</strong>,
-                you'll end with <strong>{result.endingNetWorthPlanned !== null ? fmtMoney(result.endingNetWorthPlanned) : '—'}</strong>.</li>
+              <li>{t('res.ifPlannedAge')} (<strong>{data.income.myRetirementAge}</strong>),
+                {t('res.youllEndWith')} <strong>{result.endingNetWorthPlanned !== null ? fmtMoney(result.endingNetWorthPlanned) : '—'}</strong>.</li>
               {result.possibleAge !== null && (
-                <li>If you retire at the <strong>earliest possible age ({result.possibleAge})</strong>,
-                  you'll end with <strong>{result.endingNetWorthAtPossible !== null ? fmtMoney(result.endingNetWorthAtPossible) : '—'}</strong>.
-                  This is your minimum "safe buffer" — it's positive because retirement happens at
-                  whole-year boundaries (you can't retire mid-year), so there's always some leftover
-                  when you cross the threshold. Retiring 1 year earlier than this would fail.</li>
+                <li>{t('res.ifEarliestAge')} (<strong>{result.possibleAge}</strong>),
+                  {t('res.youllEndWith')} <strong>{result.endingNetWorthAtPossible !== null ? fmtMoney(result.endingNetWorthAtPossible) : '—'}</strong>.
+                  {' '}{t('res.bufferExplain')}</li>
               )}
             </ul>
             {result.endingNetWorthAtPossible !== null && result.endingNetWorthAtPossible > 200000 && (
               <p style={{ margin: '8px 0 0' }}>
-                💡 <em>Notice the buffer is large?</em> That usually means your investment growth
-                rates exceed your withdrawal rate — assets compound faster than you spend.
-                If you want to see assets actually deplete toward zero, you can model it by lowering
-                your account growth rates in the IRA/401k cards, or increasing your expense brackets.
+                💡 <em>{t('res.bufferLargeQ')}</em> {t('res.bufferLargeExplain')}
               </p>
             )}
           </div>
@@ -350,11 +343,9 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
           {/* ── Recommendations (only when plan fails) ── */}
           {result.recommendations && result.recommendations.length > 0 && (
             <div className="recs-panel">
-              <h3>🛟 How to Fix This Plan</h3>
+              <h3>{t('res.fixTitle')}</h3>
               <p className="recs-note">
-                Your money runs out at age {result.moneyRunOutAge}. Below are
-                independent fixes (each calculated locally — no AI involved).
-                Pick any one, or combine smaller versions of several.
+                {t('res.fixNoteA')} {result.moneyRunOutAge}. {t('res.fixNoteB')}
               </p>
               <div className="recs-grid">
                 {result.recommendations.map((r, i) => (
@@ -371,15 +362,9 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
           {/* ── Optimizations (only when plan succeeds) ── */}
           {result.optimizations && result.optimizations.length > 0 && (
             <div className="opts-panel">
-              <h3>💡 Ways to Maximize Your Wealth</h3>
+              <h3>{t('res.maxTitle')}</h3>
               <p className="opts-note">
-                Your plan already succeeds. Below are independent tweaks that
-                would leave you with even MORE at life expectancy — both
-                <strong> timing decisions</strong> (sell-house age, SS claim age,
-                retirement age) AND <strong>dollar amounts</strong> (UL premium,
-                IRA / 401k contributions, extra mortgage principal). Sorted by
-                biggest impact first. Each was found by re-running the simulation
-                with that single change.
+                {t('res.maxNote')}
               </p>
               <div className="recs-grid">
                 {result.optimizations.map((o, i) => (
@@ -394,11 +379,9 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
           )}
           {result.optimizations && result.optimizations.length === 0 && result.moneyRunOutAge === null && (
             <div className="opts-panel opts-already-optimal">
-              <h3>💡 Already Well-Optimized</h3>
+              <h3>{t('res.alreadyOptTitle')}</h3>
               <p className="opts-note" style={{ marginBottom: 0 }}>
-                Tested house-sale timing, UL-cancel timing, both spouses' SS claim ages,
-                and delayed-retirement scenarios. None would improve your ending total assets
-                by more than 2%. Your timing decisions look good.
+                {t('res.alreadyOptNote')}
               </p>
             </div>
           )}
@@ -408,16 +391,16 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
             <div className="scenario-banner">
               {japanEnabled && (
                 <div className="scenario-chip">
-                  🌏 Relocation at age {data.japan.moveAge} ·
-                  cost × {data.japan.costMultiplier} ·
-                  withdrawal tax {data.japan.withdrawalTaxRate}%
-                  {data.japan.sellHouseOnMove && ' · house auto-sold'}
+                  🌏 {t('res.chipReloc')} {data.japan.moveAge} ·
+                  {' '}{t('res.chipCostX')} {data.japan.costMultiplier} ·
+                  {' '}{t('res.chipWdTax')} {data.japan.withdrawalTaxRate}%
+                  {data.japan.sellHouseOnMove && ` · ${t('res.chipHouseSold')}`}
                 </div>
               )}
               {survivorEnabled && (
                 <div className="scenario-chip">
-                  🕯️ Survivor scenario at age {data.survivor.eventAge} ·
-                  expenses × {data.survivor.expenseFactor}
+                  🕯️ {t('res.chipSurvivor')} {data.survivor.eventAge} ·
+                  {' '}{t('res.chipExpX')} {data.survivor.expenseFactor}
                 </div>
               )}
             </div>
@@ -427,52 +410,48 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
           {mcEnabled && (
             <div className="mc-card">
               <div className="mc-header">
-                <h3>🎲 Monte Carlo Risk Analysis</h3>
+                <h3>{t('res.mcTitle')}</h3>
                 <button onClick={runMC} disabled={mcRunning}>
-                  {mcRunning ? 'Running…' : (mcResult ? 'Re-run' : `Run ${data.monteCarlo.runs} simulations`)}
+                  {mcRunning ? t('res.mcRunning') : (mcResult ? t('res.mcRerun') : `${t('res.mcRun')} ${data.monteCarlo.runs} ${t('res.mcSims')}`)}
                 </button>
               </div>
               {mcResult && (
                 <div className="mc-stats">
                   <MCStat
-                    label="Success rate"
+                    label={t('res.mcSuccessRate')}
                     value={`${(mcResult.successRate * 100).toFixed(1)}%`}
-                    sub={`${mcResult.runs} runs · σ = ${data.monteCarlo.volatility}%`}
+                    sub={`${mcResult.runs} ${t('res.mcRuns')} · σ = ${data.monteCarlo.volatility}%`}
                     big
                     danger={mcResult.successRate < 0.75}
                     good={mcResult.successRate >= 0.85}
                   />
                   <MCStat
-                    label="Final total assets — median"
+                    label={t('res.mcMedianNW')}
                     value={fmtMoney(mcResult.medianFinalNetWorth)}
-                    sub="50th percentile"
+                    sub={t('res.mc50th')}
                   />
                   <MCStat
-                    label="Worst-case (10th %ile)"
+                    label={t('res.mcWorst')}
                     value={fmtMoney(mcResult.p10FinalNetWorth)}
-                    sub="bottom 10% of outcomes"
+                    sub={t('res.mcBottom10')}
                   />
                   <MCStat
-                    label="Best-case (90th %ile)"
+                    label={t('res.mcBest')}
                     value={fmtMoney(mcResult.p90FinalNetWorth)}
-                    sub="top 10% of outcomes"
+                    sub={t('res.mcTop10')}
                   />
                   {mcResult.medianRunOutAge !== null && (
                     <MCStat
-                      label="Median failure age"
+                      label={t('res.mcMedFail')}
                       value={mcResult.medianRunOutAge}
-                      sub="when funds typically run out in failed runs"
+                      sub={t('res.mcMedFailSub')}
                       danger
                     />
                   )}
                 </div>
               )}
               {!mcResult && !mcRunning && (
-                <p className="mc-hint">
-                  Click to estimate the probability your plan survives by re-running with
-                  randomized returns. A success rate above 85% is generally considered safe;
-                  below 75% is risky.
-                </p>
+                <p className="mc-hint">{t('res.mcHint')}</p>
               )}
             </div>
           )}
@@ -485,8 +464,8 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
           />
 
           <p className="inflation-note">
-            ℹ️ All future expenses and income are auto-inflated at <strong>{data.personal.inflationRate}%/year</strong>.
-            You entered today's dollars — the table shows nominal (future) dollars at each age.
+            ℹ️ {t('res.inflNoteA')} <strong>{data.personal.inflationRate}%/year</strong>.
+            {' '}{t('res.inflNoteB')}
           </p>
 
           {/* (Chart was here originally; moved up near the comparison panel.) */}
@@ -516,6 +495,7 @@ function SummaryCard({ label, value, sub, highlight, danger }) {
 // expectancy) and shows total liquid assets + total net worth side by side.
 // Far more scannable than scrolling the year-by-year table.
 function AssetLifelineTable({ rows, retireAge, lifeExp }) {
+  const t = useT();
   if (!rows || rows.length === 0) return null;
 
   // Build the set of milestone ages: current, retirement, every 5 years
@@ -537,16 +517,13 @@ function AssetLifelineTable({ rows, retireAge, lifeExp }) {
 
   return (
     <div className="asset-lifeline">
-      <h3>💰 Total Assets at Key Ages</h3>
-      <p className="lifeline-note">
-        Total assets at each milestone (in nominal/future dollars) — liquid accounts
-        plus home equity.
-      </p>
+      <h3>{t('res.lifelineTitle')}</h3>
+      <p className="lifeline-note">{t('res.lifelineNote')}</p>
       <div className="lifeline-grid">
         <div className="lifeline-header">
-          <div>Age</div>
-          <div>Total Assets</div>
-          <div>Δ vs prior milestone</div>
+          <div>{t('res.colAge')}</div>
+          <div>{t('res.colTotalAssets')}</div>
+          <div>{t('res.colDelta')}</div>
         </div>
         {milestones.map((age, idx) => {
           const r = rowAt(age);
@@ -570,13 +547,13 @@ function AssetLifelineTable({ rows, retireAge, lifeExp }) {
             <div key={age} className={rowCls}>
               <div className="lifeline-age">
                 <span>
-                  Age {age}
+                  {t('res.ageWord')} {age}
                   {r.wifeAge !== undefined && r.wifeAge !== age && (
-                    <span className="lifeline-wife-age"> · spouse {r.wifeAge}</span>
+                    <span className="lifeline-wife-age"> · {t('res.spouseWord')} {r.wifeAge}</span>
                   )}
                 </span>
-                {isRetire && <span className="tag tag-retire">Retire</span>}
-                {isLife && <span className="tag tag-life">Life Exp.</span>}
+                {isRetire && <span className="tag tag-retire">{t('res.tagRetire')}</span>}
+                {isLife && <span className="tag tag-life">{t('res.tagLifeExp')}</span>}
               </div>
               <div className="lifeline-liquid">{fmtMoney(r.cumulativeNetWorth)}</div>
               <div className={`lifeline-delta ${deltaCls}`}>
@@ -610,7 +587,7 @@ function ComparisonPanel({ comparison }) {
   if (noInputChanges && noMetricChanges) {
     return (
       <div className="comparison-panel quiet">
-        🔄 No inputs have changed since your last calculation.
+        {t('res.cmpNoChange')}
       </div>
     );
   }
@@ -635,16 +612,16 @@ function ComparisonPanel({ comparison }) {
       {/* Inputs side — uses the same .impact-row grid as the Impact section
           below so the Before/After columns line up vertically. */}
       <div className="comparison-section">
-        <h4>Inputs ({inputChanges.length} change{inputChanges.length === 1 ? '' : 's'})</h4>
+        <h4>{t('res.cmpInputs')} ({inputChanges.length} {inputChanges.length === 1 ? t('res.cmpChange') : t('res.cmpChanges')})</h4>
         {inputChanges.length === 0 ? (
-          <p className="comparison-empty">No input fields changed.</p>
+          <p className="comparison-empty">{t('res.cmpNoInput')}</p>
         ) : (
           <div className="impact-grid">
             <div className="impact-row impact-header-row">
-              <div className="impact-label">Field</div>
-              <div className="impact-before">Before</div>
+              <div className="impact-label">{t('res.cmpField')}</div>
+              <div className="impact-before">{t('res.cmpBefore')}</div>
               <div className="impact-arrow"></div>
-              <div className="impact-after">After</div>
+              <div className="impact-after">{t('res.cmpAfter')}</div>
               <div className="impact-delta"></div>
             </div>
             {inputChanges.slice(0, 50).map((c, i) => (
@@ -659,7 +636,7 @@ function ComparisonPanel({ comparison }) {
             {inputChanges.length > 50 && (
               <div className="impact-row" style={{ color: 'var(--muted)', fontStyle: 'italic' }}>
                 <div className="impact-label" style={{ gridColumn: '1 / -1' }}>
-                  …and {inputChanges.length - 50} more
+                  {t('res.cmpAndMore')} {inputChanges.length - 50} {t('res.cmpMore')}
                 </div>
               </div>
             )}
@@ -669,25 +646,25 @@ function ComparisonPanel({ comparison }) {
 
       {/* Results side */}
       <div className="comparison-section">
-        <h4>Impact on Results</h4>
+        <h4>{t('res.cmpImpact')}</h4>
         <div className="impact-grid">
           <div className="impact-row impact-header-row">
-            <div className="impact-label">Metric</div>
-            <div className="impact-before">Before</div>
+            <div className="impact-label">{t('res.cmpMetric')}</div>
+            <div className="impact-before">{t('res.cmpBefore')}</div>
             <div className="impact-arrow"></div>
-            <div className="impact-after">After</div>
+            <div className="impact-after">{t('res.cmpAfter')}</div>
             <div className="impact-delta">Δ</div>
           </div>
           <ImpactRow
-            label="Money lasts to life expectancy?"
-            before={metrics.moneyLasts.prev ? 'Yes ✓' : `No (runs out @ ${metrics.moneyLasts.prevAge})`}
-            after={metrics.moneyLasts.curr ? 'Yes ✓' : `No (runs out @ ${metrics.moneyLasts.currAge})`}
+            label={t('res.cmpMoneyLasts')}
+            before={metrics.moneyLasts.prev ? t('res.yes') : `${t('res.cmpRunsOut')} ${metrics.moneyLasts.prevAge})`}
+            after={metrics.moneyLasts.curr ? t('res.yes') : `${t('res.cmpRunsOut')} ${metrics.moneyLasts.currAge})`}
             highlight={metrics.moneyLasts.prev !== metrics.moneyLasts.curr}
             improved={!metrics.moneyLasts.prev && metrics.moneyLasts.curr}
             worsened={metrics.moneyLasts.prev && !metrics.moneyLasts.curr}
           />
           <ImpactRow
-            label="Ending total assets (at life expectancy)"
+            label={t('res.cmpEndingNW')}
             before={fmtMoney(metrics.endingNetWorth.prev)}
             after={fmtMoney(metrics.endingNetWorth.curr)}
             delta={fmtDelta(endingDelta)}
@@ -695,7 +672,7 @@ function ComparisonPanel({ comparison }) {
           />
           {retireNWDelta !== null && (
             <ImpactRow
-              label="Total assets at planned retirement"
+              label={t('res.cmpNWatRetire')}
               before={fmtMoney(metrics.netWorthAtRetirement.prev)}
               after={fmtMoney(metrics.netWorthAtRetirement.curr)}
               delta={fmtDelta(retireNWDelta)}
@@ -703,7 +680,7 @@ function ComparisonPanel({ comparison }) {
             />
           )}
           <ImpactRow
-            label="Earliest possible retirement age"
+            label={t('res.cmpEarliestAge')}
             before={metrics.possibleAge.prev ?? '—'}
             after={metrics.possibleAge.curr ?? '—'}
             highlight={metrics.possibleAge.prev !== metrics.possibleAge.curr}
@@ -722,7 +699,7 @@ function ComparisonPanel({ comparison }) {
       {/* ── Analysis: plain-English why-it-changed ── */}
       {(insights.length > 0 || summary) && (
         <div className="comparison-section">
-          <h4>分析 — 結果が変わった理由（Analysis）</h4>
+          <h4>{t('res.cmpAnalysis')}</h4>
           {summary && (
             <div className={`impact-summary tone-${summary.tone}`}>
               {summary.text}

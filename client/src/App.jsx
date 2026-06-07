@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import InputForm, { defaultInputs } from './components/InputForm.jsx';
 import ResultsScreen from './components/ResultsScreen.jsx';
 import { loadData, saveData } from './api.js';
-import { useLang } from './i18n.jsx';
+import { useLang, useT } from './i18n.jsx';
 
 // Fixed language toggle shown at the top-right on every screen.
 function LanguageToggle() {
@@ -31,6 +31,7 @@ function LanguageToggle() {
 const SNAPSHOT_KEY = 'retirementApp.lastCalcSnapshot';
 
 export default function App() {
+  const t = useT();
   const [data, setData]           = useState(defaultInputs());
   const [view, setView]           = useState('input');
   const [saving, setSaving]       = useState(false);
@@ -108,19 +109,19 @@ export default function App() {
   function validate(d) {
     const errs = [];
     if (!d.personal.myDOB)
-      errs.push('Your date of birth is required (Personal Info).');
+      errs.push(t('val.dobRequired'));
     if (!d.personal.wifeDOB)
-      errs.push("Wife's date of birth is required (Personal Info).");
+      errs.push(t('val.spouseDobRequired'));
     if (!d.personal.lifeExpectancy || d.personal.lifeExpectancy < 60)
-      errs.push('Life expectancy must be at least 60 (Personal Info).');
+      errs.push(t('val.lifeExpMin'));
     if (!d.income.myRetirementAge || d.income.myRetirementAge < 40)
-      errs.push('Your retirement age must be at least 40 (Income).');
+      errs.push(t('val.retireMin'));
 
     const hasAnyExpense = Object.values(d.expenseBrackets).some((b) =>
       Object.values(b).some((v) => Number(v) > 0)
     );
     if (!hasAnyExpense)
-      errs.push('Enter at least one monthly living cost (Monthly Living Costs).');
+      errs.push(t('val.expenseMin'));
 
     return errs;
   }
@@ -261,14 +262,14 @@ export default function App() {
 
   // ── Loading / error states ───────────────────────────────────────────────
   if (loadStatus === 'loading') {
-    return <div className="loading">Loading saved data…</div>;
+    return <div className="loading">{t('load.loading')}</div>;
   }
   if (loadStatus === 'error') {
     return (
       <div className="loading">
-        <p>Could not reach the local server on port 3001.</p>
+        <p>{t('load.errLine1')}</p>
         <p>Run <code>npm start</code> in your project folder, then refresh.</p>
-        <p>Your data is safe — nothing was lost.</p>
+        <p>{t('load.errLine3')}</p>
       </div>
     );
   }

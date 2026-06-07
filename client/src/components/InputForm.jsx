@@ -454,6 +454,7 @@ export default function InputForm({
   onImportData,
 }) {
   const t = useT();
+  const tr = useUITranslate();
   const set = (path) => makeSetter(setData, path);
   const scenarios = data.scenarios || [null, null, null, null, null];
 
@@ -532,7 +533,7 @@ export default function InputForm({
       {/* ── Saved scenarios bar (top of form) ── */}
       <div className="scenario-bar">
         <div className="scenario-bar-title">
-          📁 Saved Scenarios <em className="hint">— snapshot the current inputs to a slot, then load or compare later</em>
+          {t('scenario.title')} <em className="hint">{t('scenario.titleHint')}</em>
         </div>
         <div className="scenario-cards">
           {scenarios.map((sc, i) => (
@@ -549,7 +550,7 @@ export default function InputForm({
       {/* ── Validation errors ── */}
       {validationErrors.length > 0 && (
         <div className="validation-box">
-          <strong>Please fix the following before calculating:</strong>
+          <strong>{t('validation.header')}</strong>
           <ul>
             {validationErrors.map((e, i) => <li key={i}>{e}</li>)}
           </ul>
@@ -562,11 +563,7 @@ export default function InputForm({
       {/* ── Personal Info ── */}
       <details open>
         <summary>{t('sec.personal')}</summary>
-        <p className="section-note">
-          Inflation is applied automatically to all future expenses and incomes.
-          Enter all dollar amounts in <strong>today's dollars</strong>; the
-          simulator will inflate them year-by-year.
-        </p>
+        <p className="section-note">{t('note.personal')}</p>
         <div className="grid-2">
           <DateField label="My date of birth" value={data.personal.myDOB}
             onChange={set(['personal', 'myDOB'])} required />
@@ -648,10 +645,10 @@ export default function InputForm({
           return (
             <div className="card" style={{ borderColor: inv.enabled ? '#2ea043' : undefined }}>
               <h4 style={{ marginBottom: 10 }}>
-                💹 Auto-invest excess cash{' '}
+                {t('h4.autoInvest')}{' '}
                 {inv.enabled
-                  ? <span className="hint">— active: excess above the threshold earns the return below</span>
-                  : <span className="hint">— enable to invest idle cash above a threshold</span>}
+                  ? <span className="hint">{t('hint.autoInvestOn')}</span>
+                  : <span className="hint">{t('hint.autoInvestOff')}</span>}
               </h4>
               <div className="grid-3">
                 <SelectField label="Enable auto-invest"
@@ -670,20 +667,19 @@ export default function InputForm({
               </div>
               <div className="bracket-totals" style={{ marginTop: 12 }}>
                 <div className="bracket-totals-row">
-                  <span>Current bank total</span>
+                  <span>{tr('Current bank total')}</span>
                   <span className="amount">{fmt(bankTotalNow)}</span>
                 </div>
                 <div className="bracket-totals-row">
-                  <span>Investable excess (above {fmt(threshold)})</span>
+                  <span>{tr('Investable excess (above threshold)')} ({fmt(threshold)})</span>
                   <span className="amount">{fmt(excess)}</span>
                 </div>
                 <div className="bracket-totals-row bracket-totals-grandtotal income-row">
-                  <span>Estimated annual interest income (@ {rate}%)</span>
+                  <span>{tr('Estimated annual interest income')} (@ {rate}%)</span>
                   <span className="amount">{fmt(estIncome)}</span>
                 </div>
                 <div className="bracket-totals-sub">
-                  <em>Estimate uses your current bank total. The projection recomputes
-                  this each year from that year's start-of-year bank balance.</em>
+                  <em>{tr('Estimate uses your current bank total; the projection recomputes it each year.')}</em>
                 </div>
               </div>
             </div>
@@ -749,20 +745,20 @@ export default function InputForm({
             return (
               <div className="bracket-totals" style={{ marginTop: 12 }}>
                 <div className="bracket-totals-row">
-                  <span>Monthly premium (from take-home)</span>
+                  <span>{tr('Monthly premium (from take-home)')}</span>
                   <span className="amount">{fmt(prem)}</span>
                 </div>
                 <div className="bracket-totals-row">
-                  <span>− Insurance fee (cost of coverage)</span>
+                  <span>{tr('− Insurance fee (cost of coverage)')}</span>
                   <span className="amount">−{fmt(fee)}</span>
                 </div>
                 <div className="bracket-totals-row bracket-totals-subtotal income-row">
-                  <span>→ Into cash value (compounds at {Number(data.ul.growthRate) || 0}%)</span>
+                  <span>{tr('→ Into cash value (compounds at rate)')} ({Number(data.ul.growthRate) || 0}%)</span>
                   <span className="amount">{fmt(toCash)}/mo · {fmt(toCash * 12)}/yr</span>
                 </div>
                 {fee > prem && (
                   <div className="bracket-totals-sub" style={{ color: 'var(--red)' }}>
-                    ⚠ Fee exceeds premium — nothing is added to the cash value.
+                    {tr('⚠ Fee exceeds premium — nothing is added to the cash value.')}
                   </div>
                 )}
               </div>
@@ -774,23 +770,11 @@ export default function InputForm({
       {/* ── IRAs ── */}
       <details>
         <summary>{t('sec.iras')}</summary>
-        <p className="section-note">
-          <strong>Traditional</strong>: contributions are post-tax (already excluded
-          from your take-home if you're auto-funding it), withdrawals are taxed. RMDs
-          required starting at age 73.<br />
-          <strong>Roth</strong>: contributions and withdrawals are both tax-free in retirement. No RMDs.<br />
-          Add as many accounts as you need — each gets its own column in the results table.<br />
-          <strong>⚠ Tax is a flat estimate:</strong> withdrawals use the single
-          "withdrawal tax rate" you enter below — the simulator does <em>not</em>
-          model progressive tax brackets. A large one-year withdrawal (e.g. cashing
-          out a big chunk after 59½) would in reality be taxed much higher as it pushes
-          you into top brackets, so this tool understates the cost of lump-sum
-          withdrawals. Spreading withdrawals over many years is more tax-efficient.
-        </p>
+        <p className="section-note">{t('note.iras')}</p>
         {data.iras.map((a, i) => (
           <div key={i} className="card">
             <h4 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>IRA {i + 1} <em className="hint">(leave blank if unused)</em></span>
+              <span>IRA {i + 1} <em className="hint">{t('lbl.leaveBlank')}</em></span>
               {data.iras.length > 1 && (
                 <button
                   type="button"
@@ -798,7 +782,7 @@ export default function InputForm({
                   onClick={() => removeIRA(i)}
                   title="Remove this IRA account"
                 >
-                  🗑 Remove
+                  {t('btn.remove')}
                 </button>
               )}
             </h4>
@@ -833,34 +817,21 @@ export default function InputForm({
         ))}
         <button type="button" className="btn-primary-sm" onClick={addIRA}
           style={{ marginTop: 4 }}>
-          ＋ Add IRA
+          {t('btn.addIRA')}
         </button>
       </details>
 
       {/* ── 401ks ── */}
       <details>
         <summary>{t('sec.k401s')}</summary>
-        <p className="section-note">
-          <strong>Traditional 401k</strong>: pre-tax payroll deduction — NOT subtracted
-          again from your after-tax take-home; withdrawals are taxed. RMDs at 73.<br />
-          <strong>Roth 401k</strong>: post-tax payroll deduction — IS subtracted from
-          take-home; withdrawals tax-free. No RMDs (as of 2024).<br />
-          <strong>Company match</strong> is added to the balance but doesn't affect cash flow.<br />
-          Add as many accounts as you need — each gets its own column in the results table.<br />
-          <strong>⚠ Tax is a flat estimate:</strong> withdrawals use the single
-          "withdrawal tax rate" you enter below — the simulator does <em>not</em>
-          model progressive tax brackets. A large one-year withdrawal (e.g. cashing
-          out a big chunk after 59½) would in reality be taxed much higher as it pushes
-          you into top brackets, so this tool understates the cost of lump-sum
-          withdrawals. Spreading withdrawals over many years is more tax-efficient.
-        </p>
+        <p className="section-note">{t('note.k401s')}</p>
         {data.k401s.map((a, i) => (
           <div key={i} className="card">
             <h4 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>401k {i + 1} <em className="hint">(leave blank if unused)</em></span>
+              <span>401k {i + 1} <em className="hint">{t('lbl.leaveBlank')}</em></span>
               {data.k401s.length > 1 && (
                 <button type="button" className="btn-danger-sm" onClick={() => removeK401(i)}
-                  title="Remove this 401k account">🗑 Remove</button>
+                  title="Remove this 401k account">{t('btn.remove')}</button>
               )}
             </h4>
             <div className="grid-3">
@@ -897,30 +868,16 @@ export default function InputForm({
         ))}
         <button type="button" className="btn-primary-sm" onClick={addK401}
           style={{ marginTop: 4 }}>
-          ＋ Add 401k
+          {t('btn.add401k')}
         </button>
       </details>
 
       {/* ── Social Security (last in Savings & Investments) ── */}
       <details>
         <summary>{t('sec.ss')}</summary>
-        <p className="section-note">
-          Enter the monthly benefit your SSA statement projects at <strong>Full Retirement
-          Age (67)</strong>. Choosing a different claim age automatically scales the
-          benefit using SSA's standard reduction / delayed-credit table:
-          age 62 = 70%, 65 = 86.7%, 67 = 100%, 70 = 124%.<br />
-          <strong>Spousal benefit is applied automatically</strong>: if one spouse's own
-          benefit is less than 50% of the other's <em>FRA</em> benefit, SSA pays their
-          own benefit first, then adds a <strong>spousal top-off</strong> to bring the
-          total up to that 50% mark. The 50% target is locked to the higher earner's
-          age-67 amount (delaying their claim past FRA does not raise it), and the
-          top-off is reduced if the receiving spouse claims early (~32.5% at 62). The
-          top-off only starts once the higher earner has actually filed. So when both
-          file at FRA and the lower earner qualifies, the household total is up to 150%
-          of the higher earner's FRA benefit.
-        </p>
+        <p className="section-note">{t('note.ss')}</p>
         <div className="card">
-          <h4>Mine</h4>
+          <h4>{t('h4.mine')}</h4>
           <div className="grid-2">
             <NumberField label="Estimated monthly benefit at FRA (67)"
               value={data.ss.mySSAmount}
@@ -988,16 +945,7 @@ export default function InputForm({
       {/* ── Home Rental Option ── */}
       <details>
         <summary>{t('sec.rental')}</summary>
-        <p className="section-note">
-          Instead of selling outright, rent the house out starting on your
-          <strong> retirement birthday</strong> (age {data.income.myRetirementAge || '—'}).
-          The house keeps appreciating, you collect rent income, but you incur higher
-          maintenance and one-time setup costs. Mortgage P&amp;I continues normally.<br />
-          <strong>When rental is enabled, Real Estate → "Age to sell house" is
-          ignored.</strong> Use the rental section's own <em>"Sell rental at age"</em>
-          field instead — set it to 0 to hold the rental through life expectancy,
-          or to a specific age to sell after renting for a while.
-        </p>
+        <p className="section-note">{t('note.rental')}</p>
         <div className="card">
           <div className="grid-2">
             <SelectField label="Enable rental option"
@@ -1041,13 +989,7 @@ export default function InputForm({
       {/* ── New Home Purchase ── */}
       <details>
         <summary>{t('sec.newHome')}</summary>
-        <p className="section-note">
-          Buy a new primary residence at a chosen age — e.g. while you rent out the
-          current house. The <strong>price is what you actually pay that year</strong>
-          (nominal). The down payment leaves your bank; a new mortgage starts; the home
-          appreciates and accrues maintenance; its equity counts toward net worth.
-          Monthly payment is auto-calculated from price, down, APR and term.
-        </p>
+        <p className="section-note">{t('note.newHome')}</p>
         <div className="card">
           <div className="grid-2">
             <SelectField label="Enable new home purchase"
@@ -1094,9 +1036,9 @@ export default function InputForm({
             const tot = financed > 0 && term > 0 ? calcTotalInterest(financed, term, Number(data.newHome?.apr) || 0) : 0;
             return mo > 0 ? (
               <p className="section-note" style={{ marginTop: 10, marginBottom: 0 }}>
-                Financed: <strong>${Math.round(financed).toLocaleString('en-US')}</strong> ·
-                Monthly P&amp;I: <strong style={{ color: '#5b21b6' }}>${Math.round(mo).toLocaleString('en-US')}</strong> ·
-                Total interest: <strong style={{ color: '#b45309' }}>${Math.round(tot).toLocaleString('en-US')}</strong>
+                {tr('Financed')}: <strong>${Math.round(financed).toLocaleString('en-US')}</strong> ·
+                {tr('Monthly P&I')}: <strong style={{ color: '#5b21b6' }}>${Math.round(mo).toLocaleString('en-US')}</strong> ·
+                {tr('Total interest')}: <strong style={{ color: '#b45309' }}>${Math.round(tot).toLocaleString('en-US')}</strong>
               </p>
             ) : null;
           })()}
@@ -1109,11 +1051,7 @@ export default function InputForm({
       {/* ── Expense Brackets ── */}
       <details>
         <summary>{t('sec.brackets')} <em className="hint">{t('sec.required')}</em></summary>
-        <p className="section-note">
-          Define as many custom age ranges as you need. Inflation is applied automatically.
-          If ranges overlap, the first match wins. If there's a gap, the nearest
-          earlier bracket carries forward.
-        </p>
+        <p className="section-note">{t('note.brackets')}</p>
 
         {/* ── Relocation cost adjustment ──
             Full relocation controls live here (the standalone Japan Relocation
@@ -1123,10 +1061,10 @@ export default function InputForm({
             below shows its cost before vs. after the move. */}
         <div className="card" style={{ borderColor: data.japan?.enabled ? '#db2777' : undefined }}>
           <h4 style={{ marginBottom: 10 }}>
-            🌏 Relocation cost adjustment{' '}
+            {t('h4.reloc')}{' '}
             {data.japan?.enabled
-              ? <span className="hint">— active: each bracket below shows before/after</span>
-              : <span className="hint">— enable to apply a cost-of-living + tax change at the move age</span>}
+              ? <span className="hint">{t('hint.relocOn')}</span>
+              : <span className="hint">{t('hint.relocOff')}</span>}
           </h4>
           <div className="grid-2">
             <SelectField label="Enable relocation scenario"
@@ -1148,10 +1086,7 @@ export default function InputForm({
               step={0.5}
               hint="replaces each account's US rate after the move; ≈ 20% common for Japan" />
           </div>
-          <p className="section-note" style={{ margin: '10px 0 0' }}>
-            <strong>House sale:</strong> set Real Estate → "Age to sell house" to the year
-            you plan to sell (often aligned to your move age). The simulator follows that field.
-          </p>
+          <p className="section-note" style={{ margin: '10px 0 0' }}>{t('note.reloc')}</p>
         </div>
 
         {data.expenseBrackets.map((b, i) => (
@@ -1168,20 +1103,14 @@ export default function InputForm({
         ))}
         <button type="button" className="btn-primary-sm" onClick={addBracket}
           style={{ marginTop: 4 }}>
-          ＋ Add age range
+          {t('btn.addRange')}
         </button>
       </details>
 
       {/* ── One-Time Expenses ── */}
       <details>
         <summary>{t('sec.oneTimeExp')}</summary>
-        <p className="section-note">
-          Plan for big lumpy costs — wedding gifts, a new car, kitchen renovation,
-          a special trip, college tuition, RV. Enter amounts in today's dollars
-          (inflation is applied automatically to the year it happens). These come
-          out of bank accounts first; if banks run low, the engine taps IRA/401k
-          per the usual waterfall.
-        </p>
+        <p className="section-note">{t('note.oneTimeExp')}</p>
         <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'flex-end' }}>
           <button
             type="button"
@@ -1199,15 +1128,15 @@ export default function InputForm({
             }))}
             title="Reorder the list ascending by age. Empty rows move to the bottom."
           >
-            ↑ Sort by Age
+            {t('btn.sortByAge')}
           </button>
         </div>
         <div className="onetime-table">
           <div className="onetime-header">
-            <div title="Include in calculation?">Use</div>
-            <div>Description</div>
-            <div>My Age</div>
-            <div>Amount (today's $)</div>
+            <div title="Include in calculation?">{tr('Use')}</div>
+            <div>{tr('Description')}</div>
+            <div>{tr('My Age')}</div>
+            <div>{tr("Amount (today's $)")}</div>
             <div></div>
           </div>
           {data.oneTimeExpenses.map((e, i) => {
@@ -1229,8 +1158,8 @@ export default function InputForm({
                   onChange={(ev) => set(['oneTimeExpenses', i, 'enabled'])(ev.target.value === 'yes')}
                   title="Yes = include; No = ignore but keep the values"
                 >
-                  <option value="yes">Yes</option>
-                  <option value="no">No</option>
+                  <option value="yes">{tr('Yes')}</option>
+                  <option value="no">{tr('No')}</option>
                 </select>
                 <input
                   type="text"
@@ -1276,18 +1205,14 @@ export default function InputForm({
         </div>
         <button type="button" className="btn-primary-sm" onClick={addOneTimeExpense}
           style={{ marginTop: 8 }}>
-          ＋ Add expense
+          {t('btn.addExpense')}
         </button>
       </details>
 
       {/* ── One-Time Incomes ── */}
       <details>
         <summary>{t('sec.oneTimeInc')}</summary>
-        <p className="section-note">
-          Big lumpy windfalls — inheritance, sale of a business or asset, lawsuit
-          settlement, signing bonus. Amounts in today's dollars (inflated to the
-          year they land). Deposited into Bank&nbsp;1 in that year.
-        </p>
+        <p className="section-note">{t('note.oneTimeInc')}</p>
         <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'flex-end' }}>
           <button
             type="button"
@@ -1304,15 +1229,15 @@ export default function InputForm({
             }))}
             title="Reorder ascending by age. Empty rows move to the bottom."
           >
-            ↑ Sort by Age
+            {t('btn.sortByAge')}
           </button>
         </div>
         <div className="onetime-table">
           <div className="onetime-header">
-            <div title="Include in calculation?">Use</div>
-            <div>Description</div>
-            <div>My Age</div>
-            <div>Amount (today's $)</div>
+            <div title="Include in calculation?">{tr('Use')}</div>
+            <div>{tr('Description')}</div>
+            <div>{tr('My Age')}</div>
+            <div>{tr("Amount (today's $)")}</div>
             <div></div>
           </div>
           {data.oneTimeIncomes.map((e, i) => {
@@ -1325,8 +1250,8 @@ export default function InputForm({
                   onChange={(ev) => set(['oneTimeIncomes', i, 'enabled'])(ev.target.value === 'yes')}
                   title="Yes = include; No = ignore but keep the values"
                 >
-                  <option value="yes">Yes</option>
-                  <option value="no">No</option>
+                  <option value="yes">{tr('Yes')}</option>
+                  <option value="no">{tr('No')}</option>
                 </select>
                 <input
                   type="text"
@@ -1358,31 +1283,25 @@ export default function InputForm({
         </div>
         <button type="button" className="btn-primary-sm" onClick={addOneTimeIncome}
           style={{ marginTop: 8 }}>
-          ＋ Add income
+          {t('btn.addIncome')}
         </button>
       </details>
 
       {/* ── Loans ── */}
       <details>
         <summary>{t('sec.loans')}</summary>
-        <p className="section-note">
-          Personal loans, HELOC, education loans, etc. The principal is deposited
-          into Bank 1 at the start age (so use this in conjunction with a one-time
-          expense if the loan funds a purchase). Monthly payments are
-          auto-calculated from amount, duration, and APR using the standard
-          amortization formula — shown live in the rightmost column.
-        </p>
+        <p className="section-note">{t('note.loans')}</p>
         <div className="loan-table">
           <div className="loan-header">
-            <div title="Include in calculation?">Use</div>
-            <div>Description</div>
-            <div>Person</div>
-            <div>Age</div>
-            <div>Amount</div>
-            <div>Years</div>
-            <div>APR (%)</div>
-            <div>Monthly</div>
-            <div>Total Interest</div>
+            <div title="Include in calculation?">{tr('Use')}</div>
+            <div>{tr('Description')}</div>
+            <div>{tr('Person')}</div>
+            <div>{tr('Age')}</div>
+            <div>{tr('Amount')}</div>
+            <div>{tr('Years')}</div>
+            <div>{tr('APR (%)')}</div>
+            <div>{tr('Monthly')}</div>
+            <div>{tr('Total Interest')}</div>
             <div></div>
           </div>
           {data.loans.map((loan, i) => {
@@ -1397,8 +1316,8 @@ export default function InputForm({
                   title="Yes = include this loan in the simulation; No = ignore but keep the values"
                   className="loan-enabled"
                 >
-                  <option value="yes">Yes</option>
-                  <option value="no">No</option>
+                  <option value="yes">{tr('Yes')}</option>
+                  <option value="no">{tr('No')}</option>
                 </select>
                 <input type="text"
                   placeholder={`e.g. ${['Kids college', 'Kitchen HELOC', 'Personal loan', 'Bridge loan', 'Family loan'][i] || ''}`}
@@ -1407,7 +1326,7 @@ export default function InputForm({
                 <select
                   value={loan.person || 'self'}
                   onChange={(ev) => set(['loans', i, 'person'])(ev.target.value)}>
-                  <option value="self">Self</option>
+                  <option value="self">{tr('Self')}</option>
                   <option value="wife">{t('opt.spouse', 'Spouse')}</option>
                 </select>
                 <input type="number" placeholder="age"
@@ -1436,31 +1355,25 @@ export default function InputForm({
         </div>
         <button type="button" className="btn-primary-sm" onClick={addLoan}
           style={{ marginTop: 8 }}>
-          ＋ Add loan
+          {t('btn.addLoan')}
         </button>
       </details>
 
       {/* ── Vehicle Purchases ── */}
       <details>
         <summary>{t('sec.vehicles')}</summary>
-        <p className="section-note">
-          Plan for cars and motorcycles. Enter <strong>cost, down, months, and APR</strong> —
-          the monthly payment is auto-calculated using the standard amortization
-          formula on the financed amount (cost − down). All amounts are in today's
-          dollars; inflation is locked at the purchase year (payments stay constant
-          in nominal terms once you buy).
-        </p>
+        <p className="section-note">{t('note.vehicles')}</p>
         <div className="vehicle-table">
           <div className="vehicle-header">
-            <div>Description</div>
-            <div>Person</div>
-            <div>Age</div>
-            <div>Cost</div>
-            <div>Down</div>
-            <div>Months</div>
-            <div>APR (%)</div>
-            <div>Monthly</div>
-            <div>Total Interest</div>
+            <div>{tr('Description')}</div>
+            <div>{tr('Person')}</div>
+            <div>{tr('Age')}</div>
+            <div>{tr('Cost')}</div>
+            <div>{tr('Down')}</div>
+            <div>{tr('Months')}</div>
+            <div>{tr('APR (%)')}</div>
+            <div>{tr('Monthly')}</div>
+            <div>{tr('Total Interest')}</div>
             <div></div>
           </div>
           {data.vehicles.map((v, i) => {
@@ -1479,14 +1392,14 @@ export default function InputForm({
                   value={v.description || 'car'}
                   onChange={(ev) => set(['vehicles', i, 'description'])(ev.target.value)}
                 >
-                  <option value="car">🚗 Car</option>
-                  <option value="motorcycle">🏍️ Motorcycle</option>
+                  <option value="car">{tr('🚗 Car')}</option>
+                  <option value="motorcycle">{tr('🏍️ Motorcycle')}</option>
                 </select>
                 <select
                   value={v.person || 'self'}
                   onChange={(ev) => set(['vehicles', i, 'person'])(ev.target.value)}
                 >
-                  <option value="self">Self</option>
+                  <option value="self">{tr('Self')}</option>
                   <option value="wife">{t('opt.spouse', 'Spouse')}</option>
                 </select>
                 <input type="number" placeholder="age"
@@ -1518,7 +1431,7 @@ export default function InputForm({
         </div>
         <button type="button" className="btn-primary-sm" onClick={addVehicle}
           style={{ marginTop: 8 }}>
-          ＋ Add vehicle
+          {t('btn.addVehicle')}
         </button>
       </details>
 
@@ -1532,12 +1445,7 @@ export default function InputForm({
       {/* ── Survivor scenario ── */}
       <details>
         <summary>{t('sec.survivor')}</summary>
-        <p className="section-note">
-          Models the financial impact when one spouse passes away. The surviving
-          spouse keeps the LARGER of the two Social Security checks (SSA survivor
-          rule), the deceased's income stops, and living expenses scale down for
-          one person.
-        </p>
+        <p className="section-note">{t('note.survivor')}</p>
         <div className="card">
           <div className="grid-2">
             <SelectField label={t('lbl.enableSurvivor', 'Enable survivor scenario')}
@@ -1571,11 +1479,7 @@ export default function InputForm({
       {/* ── Monte Carlo ── */}
       <details>
         <summary>{t('sec.monteCarlo')}</summary>
-        <p className="section-note">
-          Re-runs the simulation many times with randomized returns to estimate the
-          probability your plan survives. A "85% success rate" means 85% of randomized
-          scenarios kept you funded through life expectancy.
-        </p>
+        <p className="section-note">{t('note.monteCarlo')}</p>
         <div className="card">
           <div className="grid-2">
             <SelectField label="Enable Monte Carlo"
@@ -1628,6 +1532,7 @@ export default function InputForm({
 // ScenarioCard: one of 5 slots. Empty slot = "+ Save current here" button.
 // Filled slot = name, note, action buttons. Inline form for save/rename.
 function ScenarioCard({ slotIdx, scenario, handlers }) {
+  const t = useT();
   // Local UI mode: 'view' | 'new' | 'rename'
   const [mode, setMode] = useState('view');
   const [draftName, setDraftName] = useState('');
@@ -1674,7 +1579,7 @@ function ScenarioCard({ slotIdx, scenario, handlers }) {
     return (
       <div className="scenario-card scenario-empty" onClick={startNew}>
         <div className="scenario-plus">+</div>
-        <div className="scenario-empty-label">Save current as Scenario {slotIdx + 1}</div>
+        <div className="scenario-empty-label">{t('scenario.saveAs')} {slotIdx + 1}</div>
       </div>
     );
   }
@@ -1686,23 +1591,23 @@ function ScenarioCard({ slotIdx, scenario, handlers }) {
         <input
           type="text"
           className="scenario-name-input"
-          placeholder="Name (e.g. Baseline)"
+          placeholder={t('scenario.namePh')}
           value={draftName}
           autoFocus
           onChange={(e) => setDraftName(e.target.value)}
         />
         <textarea
           className="scenario-note-input"
-          placeholder="Note — what's specific about this scenario? (line breaks OK)"
+          placeholder={t('scenario.notePh')}
           rows={4}
           value={draftNote}
           onChange={(e) => setDraftNote(e.target.value)}
         />
         <div className="scenario-actions">
           <button className="btn-primary-sm" onClick={commit}>
-            {mode === 'new' ? '💾 Save' : '✓ Apply'}
+            {mode === 'new' ? t('btn.save') : t('scenario.apply')}
           </button>
-          <button onClick={cancel}>Cancel</button>
+          <button onClick={cancel}>{t('scenario.cancel')}</button>
         </div>
       </div>
     );
@@ -1718,33 +1623,35 @@ function ScenarioCard({ slotIdx, scenario, handlers }) {
       {scenario.note && <div className="scenario-note" title={scenario.note}>{scenario.note}</div>}
       <div className="scenario-actions">
         <button className="btn-primary-sm" onClick={onLoad} title="Replace current inputs with this scenario">
-          ↻ Load
+          {t('scenario.load')}
         </button>
         <button onClick={onUpdate} title="Save current inputs into this slot">
-          ⇡ Update
+          {t('scenario.update')}
         </button>
         <button onClick={startRename} title="Rename / edit note">
-          ✎ Edit
+          {t('scenario.edit')}
         </button>
         <button onClick={onDelete} className="btn-danger-sm" title="Delete this scenario">
           🗑
         </button>
       </div>
-      {savedLabel && <div className="scenario-saved-at">Saved {savedLabel}</div>}
+      {savedLabel && <div className="scenario-saved-at">{t('scenario.savedOn')} {savedLabel}</div>}
     </div>
   );
 }
 
 function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, onRemove }) {
+  const t = useT();
+  const tr = useUITranslate();
   const f = (key) => (v) => setBracket({ ...bracket, [key]: v });
   const from = Number(bracket.fromAge) || 0;
   const to = Number(bracket.toAge) || 0;
   const rangeLabel =
     from > 0 && to > 0
-      ? `Ages ${from}–${to}`
+      ? `${tr('Ages')} ${from}–${to}`
       : from > 0
-        ? `Ages ${from}+`
-        : `Bracket ${index + 1}`;
+        ? `${tr('Ages')} ${from}+`
+        : `${tr('Bracket')} ${index + 1}`;
 
   // ── Bracket-specific totals (the costs entered in this bracket) ──────
   const monthlyExpenses =
@@ -1932,11 +1839,11 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
         <span style={{ display: 'flex', gap: 6 }}>
           {onDuplicate && (
             <button type="button" className="btn-primary-sm" onClick={onDuplicate}
-              title="Insert a copy of this age range below">⧉ Duplicate</button>
+              title="Insert a copy of this age range below">{tr('⧉ Duplicate')}</button>
           )}
           {onRemove && (
             <button type="button" className="btn-danger-sm" onClick={onRemove}
-              title="Remove this age range">🗑 Remove</button>
+              title="Remove this age range">{t('btn.remove')}</button>
           )}
         </span>
       </h4>
@@ -1968,23 +1875,23 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
       {/* Live totals (recomputed on every keystroke) */}
       <div className="bracket-totals">
         <div className="bracket-totals-row">
-          <span>Monthly expenses (housing + auto + grocery + ins + medical + other)</span>
+          <span>{tr('Monthly expenses (living)')}</span>
           <span className="amount">{fmt$(monthlyExpenses)}</span>
         </div>
         <div className="bracket-totals-row">
-          <span>Monthly travel ({Number(bracket.tripsPerYear) || 0} trips × {fmt$(Number(bracket.costPerTrip) || 0)} ÷ 12)</span>
+          <span>{tr('Monthly travel')} ({Number(bracket.tripsPerYear) || 0} {tr('trips')} × {fmt$(Number(bracket.costPerTrip) || 0)} ÷ 12)</span>
           <span className="amount">{fmt$(monthlyTravel)}</span>
         </div>
         <div className="bracket-totals-row bracket-totals-subtotal">
-          <span>Bracket subtotal{relocAffectsBracket ? ' (before relocation)' : ''}</span>
+          <span>{tr('Bracket subtotal')}{relocAffectsBracket ? tr(' (before relocation)') : ''}</span>
           <span className="amount">{fmt$(bracketSubtotal)}</span>
         </div>
 
         {relocAffectsBracket && (
           <div className="bracket-totals-row bracket-totals-subtotal" style={{ color: '#831843' }}>
             <span>
-              🌏 Bracket subtotal after relocation (× {costMult})
-              {relocMidBracket ? ` — applies from age ${moveAge}` : ''}
+              {tr('🌏 Bracket subtotal after relocation')} (× {costMult})
+              {relocMidBracket ? ` — ${tr('applies from age')} ${moveAge}` : ''}
             </span>
             <span className="amount">{fmt$(bracketSubtotalAfter)}</span>
           </div>
@@ -1993,7 +1900,7 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
         {ongoingCosts.length > 0 && (
           <>
             <div className="bracket-totals-divider">
-              <span>Ongoing monthly costs active in this range</span>
+              <span>{tr('Ongoing monthly costs active in this range')}</span>
             </div>
             {ongoingCosts.map((c, i) => (
               <div key={i} className="bracket-totals-row ongoing-row">
@@ -2002,24 +1909,24 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
               </div>
             ))}
             <div className="bracket-totals-row bracket-totals-subtotal">
-              <span>Ongoing subtotal</span>
+              <span>{tr('Ongoing subtotal')}</span>
               <span className="amount">{fmt$(ongoingSubtotal)}</span>
             </div>
           </>
         )}
 
         <div className="bracket-totals-row bracket-totals-grandtotal">
-          <span>TOTAL monthly cost{relocAffectsBracket ? ' (before relocation)' : ''}</span>
+          <span>{tr('TOTAL monthly cost')}{relocAffectsBracket ? tr(' (before relocation)') : ''}</span>
           <span className="amount">{fmt$(totalMonthly)}</span>
         </div>
 
         {relocAffectsBracket && (
           <div className="bracket-totals-row bracket-totals-grandtotal" style={{ color: '#831843', borderTopColor: '#db2777' }}>
             <span>
-              🌏 TOTAL monthly cost after relocation
-              {relocMidBracket ? ` — from age ${moveAge}` : ''}
+              {tr('🌏 TOTAL monthly cost after relocation')}
+              {relocMidBracket ? ` — ${tr('from age')} ${moveAge}` : ''}
               <br /><em className="hint" style={{ fontWeight: 400 }}>
-                living + travel × {costMult}; ongoing costs unchanged
+                {tr('living + travel ×')} {costMult}{tr('; ongoing costs unchanged')}
               </em>
             </span>
             <span className="amount">{fmt$(totalMonthlyAfter)}</span>
@@ -2029,16 +1936,16 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
         {otherIncome > 0 && (
           <>
             <div className="bracket-totals-row income-row">
-              <span>− Other monthly income</span>
+              <span>{tr('− Other monthly income')}</span>
               <span className="amount">−{fmt$(otherIncome)}</span>
             </div>
             <div className="bracket-totals-row bracket-totals-net">
-              <span>Net monthly outflow{relocAffectsBracket ? ' (before relocation)' : ''}</span>
+              <span>{tr('Net monthly outflow')}{relocAffectsBracket ? tr(' (before relocation)') : ''}</span>
               <span className="amount">{fmt$(netMonthly)}</span>
             </div>
             {relocAffectsBracket && (
               <div className="bracket-totals-row bracket-totals-net" style={{ color: '#831843', borderTopColor: '#db2777' }}>
-                <span>🌏 Net monthly outflow after relocation</span>
+                <span>{tr('🌏 Net monthly outflow after relocation')}</span>
                 <span className="amount">{fmt$(netMonthlyAfter)}</span>
               </div>
             )}
@@ -2046,16 +1953,16 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
         )}
 
         <div className="bracket-totals-sub">
-          Annual equivalent: {fmt$(totalMonthly * 12)} total cost
-          {otherIncome > 0 && <> · {fmt$(otherIncome * 12)} income · {fmt$(netMonthly * 12)} net</>}
+          {tr('Annual equivalent:')} {fmt$(totalMonthly * 12)} {tr('total cost')}
+          {otherIncome > 0 && <> · {fmt$(otherIncome * 12)} {tr('income')} · {fmt$(netMonthly * 12)} {tr('net')}</>}
           {relocAffectsBracket && (
-            <> · <strong style={{ color: '#831843' }}>after relocation: {fmt$(totalMonthlyAfter * 12)} total cost
-            {otherIncome > 0 && <> · {fmt$(netMonthlyAfter * 12)} net</>}</strong></>
+            <> · <strong style={{ color: '#831843' }}>{tr('after relocation:')} {fmt$(totalMonthlyAfter * 12)} {tr('total cost')}
+            {otherIncome > 0 && <> · {fmt$(netMonthlyAfter * 12)} {tr('net')}</>}</strong></>
           )}
           {ongoingCosts.some((c) => c.label.includes('until age')) && (
-            <> · <strong>Note:</strong> some ongoing costs end mid-bracket (see "until age X" annotations) — your actual cost drops at those ages.</>
+            <> · <strong>{tr('Note:')}</strong> {tr('some ongoing costs end mid-bracket — your actual cost drops at those ages.')}</>
           )}
-          <br /><em>(today's dollars; inflation and mid-bracket drop-offs are applied year-by-year in the simulation)</em>
+          <br /><em>{tr('(today\'s dollars; inflation and mid-bracket drop-offs are applied year-by-year)')}</em>
         </div>
       </div>
     </div>

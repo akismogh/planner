@@ -1,5 +1,6 @@
 import React from 'react';
 import { fmtMoney } from '../utils/format.js';
+import { useUITranslate } from '../i18n.jsx';
 
 // Year-by-year table. Header row and the Age/Year column are both sticky
 // (frozen). Income/expense columns get ▲/▼ markers when they change
@@ -39,7 +40,7 @@ const EVENT_CONFIG = [
   { flag: 'flagMoneyOut',      label: 'Money out',     icon: '⚠️', cls: 'evt-money-out' },
 ];
 
-function renderEventBadges(row) {
+function renderEventBadges(row, tr) {
   // Standard events (excluding one-time expense/income, handled below so we
   // can render the user-entered description on each one).
   const active = EVENT_CONFIG.filter(
@@ -47,7 +48,7 @@ function renderEventBadges(row) {
   );
   const badges = active.map((e) => (
     <span key={e.flag} className={`evt-badge ${e.cls}`}>
-      <span className="evt-icon">{e.icon}</span>{e.label}
+      <span className="evt-icon">{e.icon}</span>{tr(e.label)}
     </span>
   ));
 
@@ -194,6 +195,7 @@ function rowClassForFlags(row) {
 }
 
 export default function ResultsTable({ rows }) {
+  const tr = useUITranslate();
   if (!rows || rows.length === 0) return null;
 
   // Pre-compute monthly cashflow on each row for the new column.
@@ -224,23 +226,23 @@ export default function ResultsTable({ rows }) {
   return (
     <div className="results-table-wrapper">
       <div className="table-actions">
-        <button onClick={exportCSV}>Export CSV</button>
+        <button onClick={exportCSV}>{tr('Export CSV')}</button>
         <div className="legend">
-          <span className="evt-badge evt-retire">🎉 Retire</span>
-          <span className="evt-badge evt-ss">🏦 SS starts</span>
-          <span className="evt-badge evt-rmd">💰 RMDs (73)</span>
-          <span className="evt-badge evt-ul">📃 UL cancelled</span>
-          <span className="evt-badge evt-rental">🏘️ Rental start</span>
-          <span className="evt-badge evt-newhome">🏠 New home</span>
-          <span className="evt-badge evt-vehicle">🚗 Vehicle bought</span>
-          <span className="evt-badge evt-loan">🏦 Loan taken</span>
-          <span className="evt-badge evt-house">🏠 House sold</span>
-          <span className="evt-badge evt-japan">🌏 Relocation</span>
-          <span className="evt-badge evt-survivor">🕯️ Survivor</span>
-          <span className="evt-badge evt-onetime">💸 One-time exp</span>
-          <span className="evt-badge evt-onetimein">💰 One-time income</span>
-          <span className="evt-badge evt-money-out">⚠️ Money out</span>
-          <span className="legend-item legend-change"><span className="ch up">▲</span> up &nbsp;<span className="ch down">▼</span> down</span>
+          <span className="evt-badge evt-retire">{tr('🎉 Retire')}</span>
+          <span className="evt-badge evt-ss">{tr('🏦 SS starts')}</span>
+          <span className="evt-badge evt-rmd">{tr('💰 RMDs (73)')}</span>
+          <span className="evt-badge evt-ul">{tr('📃 UL cancelled')}</span>
+          <span className="evt-badge evt-rental">{tr('🏘️ Rental start')}</span>
+          <span className="evt-badge evt-newhome">{tr('🏠 New home')}</span>
+          <span className="evt-badge evt-vehicle">{tr('🚗 Vehicle bought')}</span>
+          <span className="evt-badge evt-loan">{tr('🏦 Loan taken')}</span>
+          <span className="evt-badge evt-house">{tr('🏠 House sold')}</span>
+          <span className="evt-badge evt-japan">{tr('🌏 Relocation')}</span>
+          <span className="evt-badge evt-survivor">{tr('🕯️ Survivor')}</span>
+          <span className="evt-badge evt-onetime">{tr('💸 One-time exp')}</span>
+          <span className="evt-badge evt-onetimein">{tr('💰 One-time income')}</span>
+          <span className="evt-badge evt-money-out">{tr('⚠️ Money out')}</span>
+          <span className="legend-item legend-change"><span className="ch up">▲</span> {tr('up')} &nbsp;<span className="ch down">▼</span> {tr('down')}</span>
         </div>
       </div>
       <div className="scroll-x">
@@ -258,7 +260,7 @@ export default function ResultsTable({ rows }) {
                   .filter(Boolean).join(' ');
                 return (
                   <th key={c.key} className={cls} data-group={c.group}>
-                    {c.label}
+                    {tr(c.label)}
                   </th>
                 );
               })}
@@ -277,7 +279,7 @@ export default function ResultsTable({ rows }) {
                         <td key={c.key} className="sticky-col sticky-col-1">
                           <div>{r.myAge} <span className="year-sub">({r.year})</span></div>
                           {r.wifeAge !== undefined && r.wifeAge !== r.myAge && (
-                            <div className="wife-age-sub">Spouse {r.wifeAge}</div>
+                            <div className="wife-age-sub">{tr('Spouse')} {r.wifeAge}</div>
                           )}
                         </td>
                       );
@@ -285,7 +287,7 @@ export default function ResultsTable({ rows }) {
                     if (c.key === 'events') {
                       return (
                         <td key={c.key} className="sticky-col sticky-col-2 events-cell">
-                          {renderEventBadges(r)}
+                          {renderEventBadges(r, tr)}
                         </td>
                       );
                     }
