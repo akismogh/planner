@@ -20,6 +20,7 @@ const FIELD_LABELS = {
   'income.wifeTaxRate': "Spouse's effective tax rate (%)",
   'income.myRetirementAge': 'My retirement age',
   'income.wifeRetirementAge': "Spouse's retirement age",
+  'income.wifeRetireWithMe': 'Spouse retires when I do',
   'income.incomeGrowthRate': 'Annual income growth rate (%)',
 
   'bankInvest.enabled': 'Auto-invest excess cash: enabled',

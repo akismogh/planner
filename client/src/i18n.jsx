@@ -206,6 +206,8 @@ const STRINGS = {
   'lbl.spouseTaxRate':     { en: "Spouse's effective tax rate (%)",   ja: '配偶者の実効税率（%）' },
   'lbl.myRetireAge':       { en: 'My retirement age',                 ja: '自分の退職年齢' },
   'lbl.spouseRetireAge':   { en: "Spouse's retirement age",           ja: '配偶者の退職年齢' },
+  'lbl.spouseRetireWithMe':{ en: 'Spouse retires when I do',          ja: '配偶者は自分と同時に退職' },
+  'lbl.spouseRetireAgeComputed': { en: "Spouse's age when I retire",  ja: '自分の退職時の配偶者の年齢' },
   'lbl.incomeGrowth':      { en: 'Annual income growth rate (%)',     ja: '年間収入成長率（%）' },
   'hint.grossMonthly':     { en: 'gross / before taxes',              ja: '額面・税引前' },
   'hint.taxRate':          { en: 'combined fed + state + payroll, effective', ja: '連邦＋州＋給与税の合計（実効）' },
@@ -414,6 +416,9 @@ const UI_JA = {
   'Auto-deplete retirement accounts': '退職口座を計画的に取り崩す',
   'No — only withdraw on shortfall (default)': 'いいえ — 不足時のみ引き出す（既定）',
   'Yes — proactively drain to $0 by life exp': 'はい — 寿命までに残高0を目指して取り崩す',
+  'No — set spouse age': 'いいえ — 配偶者の年齢を指定',
+  'Yes — same time as me': 'はい — 自分と同時',
+  'spouse stops working the year I retire': '自分が退職する年に配偶者も就労を終了',
   'Yes targets $0 balance by life expectancy using the annuity formula; net withdrawals land in bank': '「はい」は年金計算式で寿命までに残高0を目標。差引後の引き出しは銀行へ',
   // ── Auto-invest ──
   'Enable auto-invest': '自動運用を有効化',

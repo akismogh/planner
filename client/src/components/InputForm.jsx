@@ -42,6 +42,9 @@ export function defaultInputs() {
       wifeTaxRate: 25,
       myRetirementAge: 65,
       wifeRetirementAge: 65,
+      // When true, the spouse retires the same year I do (their age at that
+      // time), and `wifeRetirementAge` above is ignored.
+      wifeRetireWithMe: false,
       // Annual nominal growth of working income (raises + COLA).
       // Set equal to inflation for "real income stays flat" (typical assumption).
       // Set to 0 for "no raises" (nominal stays flat; real shrinks).
@@ -619,8 +622,28 @@ export default function InputForm({
           <NumberField label={t('lbl.myRetireAge', 'My retirement age')} value={data.income.myRetirementAge}
             onChange={set(['income', 'myRetirementAge'])} required
             hint={t('hint.retireAge', 'income stops; calculation also finds earliest possible age')} />
-          <NumberField label={t('lbl.spouseRetireAge', "Spouse's retirement age")} value={data.income.wifeRetirementAge}
-            onChange={set(['income', 'wifeRetirementAge'])} />
+          <SelectField label={t('lbl.spouseRetireWithMe', 'Spouse retires when I do')}
+            value={data.income.wifeRetireWithMe ? 1 : 0}
+            onChange={(v) => set(['income', 'wifeRetireWithMe'])(Boolean(v))}
+            options={[
+              { value: 0, label: 'No — set spouse age' },
+              { value: 1, label: 'Yes — same time as me' },
+            ]}
+            hint={data.income.wifeRetireWithMe ? tr('spouse stops working the year I retire') : undefined} />
+          {data.income.wifeRetireWithMe ? (
+            <ReadoutField
+              label={t('lbl.spouseRetireAgeComputed', "Spouse's age when I retire")}
+              value={(() => {
+                const myA = ageFromDOB(data.personal.myDOB);
+                const spA = ageFromDOB(data.personal.wifeDOB);
+                const myRet = Number(data.income.myRetirementAge) || 0;
+                if (!myA || !spA || !myRet) return '—';
+                return String(myRet - (myA - spA));
+              })()} />
+          ) : (
+            <NumberField label={t('lbl.spouseRetireAge', "Spouse's retirement age")} value={data.income.wifeRetirementAge}
+              onChange={set(['income', 'wifeRetirementAge'])} />
+          )}
           <NumberField label={t('lbl.incomeGrowth', 'Annual income growth rate (%)')}
             value={data.income.incomeGrowthRate}
             onChange={set(['income', 'incomeGrowthRate'])}

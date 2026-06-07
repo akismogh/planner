@@ -207,7 +207,15 @@ export function simulate(inputs, overrides = {}, options = {}) {
   const bankInvestRate = (Number(bankInvest.returnRate) || 0) / 100;
 
   const myRetireAge = overrides.myRetirementAge ?? Number(inputs.income.myRetirementAge);
-  const wifeRetireAge = overrides.wifeRetirementAge ?? Number(inputs.income.wifeRetirementAge);
+  let wifeRetireAge = overrides.wifeRetirementAge ?? Number(inputs.income.wifeRetirementAge);
+  // Option: spouse retires at the SAME TIME as me rather than at their own
+  // fixed age. "Same time" = the spouse's age in the year I reach my
+  // retirement age, derived from the age gap between us. This tracks any
+  // change to my retirement age automatically (incl. the possible-retirement
+  // search, which passes overrides.myRetirementAge above).
+  if (inputs.income?.wifeRetireWithMe && wifeCurrentAge > 0) {
+    wifeRetireAge = myRetireAge - (myCurrentAge - wifeCurrentAge);
+  }
 
   // Income (salary) growth is separate from price inflation. Default 3% =
   // raises that just keep pace with typical inflation. The user can set
