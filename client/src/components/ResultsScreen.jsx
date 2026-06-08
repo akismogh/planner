@@ -11,12 +11,13 @@ import {
 import { fmtMoney } from '../utils/format.js';
 import { diffInputs, friendlyLabel, formatDiffValue } from '../utils/diff.js';
 import { generateInsights, summarizeImpact, withPathSetTo } from '../utils/insights.js';
-import { useT } from '../i18n.jsx';
+import { useT, useLang } from '../i18n.jsx';
 import ResultsTable from './ResultsTable.jsx';
 import ResultsChart from './ResultsChart.jsx';
 
 export default function ResultsScreen({ data, onBack, previousSnapshot }) {
   const t = useT();
+  const { lang } = useLang();
   const [mcResult, setMcResult] = useState(null);
   const [mcRunning, setMcRunning] = useState(false);
 
@@ -141,8 +142,8 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
       // gain magnitude so the biggest wins surface first.
       const optimizations = main.moneyRunOutAge === null
         ? [
-            ...generateOptimizations(data),
-            ...generateAmountOptimizations(data),
+            ...generateOptimizations(data, lang),
+            ...generateAmountOptimizations(data, lang),
           ].sort((a, b) => b.gainValue - a.gainValue)
         : [];
 
@@ -169,7 +170,7 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
         error: err.message,
       };
     }
-  }, [data]);
+  }, [data, lang]);
 
   // Monte Carlo runs on click (expensive — hundreds of simulations)
   const runMC = () => {

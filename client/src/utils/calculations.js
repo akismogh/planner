@@ -1250,11 +1250,15 @@ export function generateRecommendations(inputs) {
 // age, UL cancel age, SS claim age) and reports which timing maximizes
 // total wealth at life expectancy. Pure local computation.
 // ──────────────────────────────────────────────────────────────────────────
-export function generateOptimizations(inputs) {
+export function generateOptimizations(inputs, lang = 'en') {
   const baseline = simulate(inputs);
   if (baseline.moneyRunOutAge !== null) return []; // only meaningful for successful plans
 
+  const ja = lang === 'ja';
   const lifeExp = Number(inputs.personal.lifeExpectancy) || 90;
+  // "+$X at age Y" impact line, localized.
+  const impactStr = (gain) =>
+    ja ? `+${formatGain(gain)}（${lifeExp}歳時点）` : `+${formatGain(gain)} at age ${lifeExp}`;
   const baselineLast = baseline.yearly[baseline.yearly.length - 1];
   const baselineNW = baselineLast ? baselineLast.cumulativeNetWorth : 0;
 
@@ -1293,16 +1297,26 @@ export function generateOptimizations(inputs) {
 
     if (bestAge !== currentSell && bestNW - baselineNW >= MIN_GAIN) {
       const gain = bestNW - baselineNW;
-      const currentLabel = currentSell > 0 ? `at ${currentSell}` : 'never';
-      const targetLabel = bestAge === 'never' ? 'never selling' : `at age ${bestAge}`;
+      const currentLabelEn = currentSell > 0 ? `at ${currentSell}` : 'never';
+      const currentClauseJa = currentSell > 0
+        ? `現在のプランでは家を${currentSell}歳で売却します。`
+        : `現在のプランでは家を売却しない設定です。`;
       opts.push({
-        title: bestAge === 'never' ? `Don't sell the house` : `Sell house at age ${bestAge}`,
-        detail: `Your plan currently sells the house ${currentLabel}. ${
-          targetLabel === 'never selling'
-            ? 'Holding it through life expectancy keeps the appreciation compounding longer than the cash conversion gains.'
-            : `Selling ${targetLabel} balances appreciation, maintenance, and cash-needs best.`
-        }`,
-        impact: `+${formatGain(gain)} at age ${lifeExp}`,
+        title: ja
+          ? (bestAge === 'never' ? `家を売らない` : `${bestAge}歳で家を売却`)
+          : (bestAge === 'never' ? `Don't sell the house` : `Sell house at age ${bestAge}`),
+        detail: ja
+          ? `${currentClauseJa}${
+              bestAge === 'never'
+                ? '寿命まで保有することで、現金化による利益よりも値上がりの複利効果が長く働きます。'
+                : `${bestAge}歳で売却すると、値上がり・維持費・現金需要のバランスが最も良くなります。`
+            }`
+          : `Your plan currently sells the house ${currentLabelEn}. ${
+              bestAge === 'never'
+                ? 'Holding it through life expectancy keeps the appreciation compounding longer than the cash conversion gains.'
+                : `Selling at age ${bestAge} balances appreciation, maintenance, and cash-needs best.`
+            }`,
+        impact: impactStr(gain),
         kind: 'optimize',
         gainValue: gain,
       });
@@ -1324,11 +1338,16 @@ export function generateOptimizations(inputs) {
     });
     if (bestAge !== currentCancel && bestNW - baselineNW >= MIN_GAIN) {
       const gain = bestNW - baselineNW;
-      const currentLabel = currentCancel > 0 ? `at age ${currentCancel}` : 'never';
+      const currentLabelEn = currentCancel > 0 ? `at age ${currentCancel}` : 'never';
+      const currentClauseJa = currentCancel > 0
+        ? `現在のプランでは${currentCancel}歳で解約します。`
+        : `現在のプランでは解約しない設定です。`;
       opts.push({
-        title: `Cancel UL insurance at age ${bestAge}`,
-        detail: `Your plan currently cancels ${currentLabel}. Cancelling at ${bestAge} optimizes the trade-off between continued growth on surrender value vs ongoing premium drain.`,
-        impact: `+${formatGain(gain)} at age ${lifeExp}`,
+        title: ja ? `${bestAge}歳でUL保険を解約` : `Cancel UL insurance at age ${bestAge}`,
+        detail: ja
+          ? `${currentClauseJa}${bestAge}歳で解約すると、解約返戻金の継続的な成長と、保険料の支払い負担とのバランスが最適になります。`
+          : `Your plan currently cancels ${currentLabelEn}. Cancelling at ${bestAge} optimizes the trade-off between continued growth on surrender value vs ongoing premium drain.`,
+        impact: impactStr(gain),
         kind: 'optimize',
         gainValue: gain,
       });
@@ -1348,13 +1367,19 @@ export function generateOptimizations(inputs) {
     if (bestAge !== currentMy && bestNW - baselineNW >= MIN_GAIN) {
       const gain = bestNW - baselineNW;
       opts.push({
-        title: `Claim my Social Security at age ${bestAge}`,
-        detail: `Currently set to claim at ${currentMy}. Claiming at ${bestAge} ${
-          bestAge > currentMy
-            ? '— delayed retirement credits add 8%/yr until 70'
-            : '— starting earlier gives more years of payments that compound in your assets'
-        }.`,
-        impact: `+${formatGain(gain)} at age ${lifeExp}`,
+        title: ja ? `自分の社会保障（SS）を${bestAge}歳で受給開始` : `Claim my Social Security at age ${bestAge}`,
+        detail: ja
+          ? `現在は${currentMy}歳で受給開始の設定です。${bestAge}歳で受給開始すると${
+              bestAge > currentMy
+                ? '、70歳まで年8%の繰下げ加算が付きます。'
+                : '、受給年数が増え、その分が資産内で複利運用されます。'
+            }`
+          : `Currently set to claim at ${currentMy}. Claiming at ${bestAge} ${
+              bestAge > currentMy
+                ? '— delayed retirement credits add 8%/yr until 70'
+                : '— starting earlier gives more years of payments that compound in your assets'
+            }.`,
+        impact: impactStr(gain),
         kind: 'optimize',
         gainValue: gain,
       });
@@ -1374,9 +1399,11 @@ export function generateOptimizations(inputs) {
     if (bestAge !== currentWife && bestNW - baselineNW >= MIN_GAIN) {
       const gain = bestNW - baselineNW;
       opts.push({
-        title: `Claim wife's Social Security at age ${bestAge}`,
-        detail: `Currently set to claim at ${currentWife}. Claiming at ${bestAge} maximizes lifetime household wealth.`,
-        impact: `+${formatGain(gain)} at age ${lifeExp}`,
+        title: ja ? `配偶者の社会保障（SS）を${bestAge}歳で受給開始` : `Claim wife's Social Security at age ${bestAge}`,
+        detail: ja
+          ? `現在は${currentWife}歳で受給開始の設定です。${bestAge}歳で受給開始すると、世帯の生涯資産が最大化されます。`
+          : `Currently set to claim at ${currentWife}. Claiming at ${bestAge} maximizes lifetime household wealth.`,
+        impact: impactStr(gain),
         kind: 'optimize',
         gainValue: gain,
       });
@@ -1396,9 +1423,13 @@ export function generateOptimizations(inputs) {
     const gain = bestRetireNW - baselineNW;
     const yrs = bestRetire - currentRetire;
     opts.push({
-      title: `Work ${yrs} more year${yrs > 1 ? 's' : ''} (retire at ${bestRetire})`,
-      detail: `Each extra working year compounds additional savings AND shortens the drawdown period. If you enjoy your work, this is the highest-leverage move.`,
-      impact: `+${formatGain(gain)} at age ${lifeExp}`,
+      title: ja
+        ? `あと${yrs}年働く（${bestRetire}歳で退職）`
+        : `Work ${yrs} more year${yrs > 1 ? 's' : ''} (retire at ${bestRetire})`,
+      detail: ja
+        ? `就労年が1年増えるごとに、追加の貯蓄が積み上がり、取り崩し期間も短くなります。仕事を楽しめるなら、これが最も効果の大きい一手です。`
+        : `Each extra working year compounds additional savings AND shortens the drawdown period. If you enjoy your work, this is the highest-leverage move.`,
+      impact: impactStr(gain),
       kind: 'optimize',
       gainValue: gain,
     });
@@ -1424,10 +1455,11 @@ function formatGain(n) {
 // value (and 0), runs the full simulation, picks the value that maximizes
 // final net worth. Only suggested if the gain exceeds MIN_GAIN.
 // ──────────────────────────────────────────────────────────────────────────
-export function generateAmountOptimizations(inputs) {
+export function generateAmountOptimizations(inputs, lang = 'en') {
   const baseline = simulate(inputs);
   if (baseline.moneyRunOutAge !== null) return []; // only meaningful for success
 
+  const ja = lang === 'ja';
   const baselineLast = baseline.yearly[baseline.yearly.length - 1];
   const baselineNW = baselineLast ? baselineLast.cumulativeNetWorth : 0;
   const lifeExp = Number(inputs.personal.lifeExpectancy) || 90;
@@ -1474,7 +1506,7 @@ export function generateAmountOptimizations(inputs) {
       opts.push({
         title: label(best, current),
         detail: detailBuilder(best, current, gain),
-        impact: `+${formatGain(gain)} at age ${lifeExp}`,
+        impact: ja ? `+${formatGain(gain)}（${lifeExp}歳時点）` : `+${formatGain(gain)} at age ${lifeExp}`,
         kind: 'optimize',
         gainValue: gain,
       });
@@ -1486,16 +1518,26 @@ export function generateAmountOptimizations(inputs) {
   const ulSurr = Number(inputs.ul?.surrenderValue) || 0;
   if (ulPrem > 0 || ulSurr > 0) {
     sweep(
-      (best) => best === 0
-        ? `Stop paying UL premium (was ${formatGain(ulPrem)}/mo)`
-        : `Change UL premium to ${formatGain(best)}/mo`,
+      (best) => ja
+        ? (best === 0
+            ? `UL保険料の支払いを停止（現在 ${formatGain(ulPrem)}/月）`
+            : `UL保険料を ${formatGain(best)}/月 に変更`)
+        : (best === 0
+            ? `Stop paying UL premium (was ${formatGain(ulPrem)}/mo)`
+            : `Change UL premium to ${formatGain(best)}/mo`),
       ulPrem,
       (adj, amt) => { adj.ul = { ...(adj.ul || {}), monthlyPremium: amt }; },
-      (best, current) => best === 0
-        ? `Freeing up ${formatGain(current * 12)}/yr (no more UL premium) lets that cash compound in other accounts. The lost surrender-value growth is more than offset.`
-        : best > current
-          ? `Increasing premium grows the surrender value faster, which becomes a cash deposit when the policy is cancelled — net positive.`
-          : `Trimming premium reduces monthly cash drag while preserving most of the surrender value growth.`,
+      (best, current) => ja
+        ? (best === 0
+            ? `${formatGain(current * 12)}/年 が浮き（UL保険料がなくなり）、その現金を他の口座で複利運用できます。失われる解約返戻金の成長分を上回ります。`
+            : best > current
+              ? `保険料を増やすと解約返戻金がより速く増え、解約時に現金として入金されます — ネットでプラスです。`
+              : `保険料を抑えると毎月の現金負担が減り、解約返戻金の成長の大部分は維持されます。`)
+        : (best === 0
+            ? `Freeing up ${formatGain(current * 12)}/yr (no more UL premium) lets that cash compound in other accounts. The lost surrender-value growth is more than offset.`
+            : best > current
+              ? `Increasing premium grows the surrender value faster, which becomes a cash deposit when the policy is cancelled — net positive.`
+              : `Trimming premium reduces monthly cash drag while preserving most of the surrender value growth.`),
       Math.max(50, Math.round(ulPrem / 3) || 100)
     );
   }
@@ -1506,11 +1548,18 @@ export function generateAmountOptimizations(inputs) {
     const balance = Number(ira.balance) || 0;
     if (balance <= 0 && current <= 0) return; // inactive account, skip
     sweep(
-      (best) => `Set IRA ${i + 1} contribution to ${formatGain(best)}/mo`,
+      (best) => ja
+        ? `IRA ${i + 1} の拠出を ${formatGain(best)}/月 に設定`
+        : `Set IRA ${i + 1} contribution to ${formatGain(best)}/mo`,
       current,
       (adj, amt) => { adj.iras[i] = { ...adj.iras[i], monthlyContrib: amt }; },
       (best, current) => {
         const delta = best - current;
+        if (ja) {
+          return delta > 0
+            ? `${formatGain(delta)}/月 増額（${formatGain(current)} → ${formatGain(best)}）。今は手元の現金が減りますが、口座の成長率で複利運用され、長期的にはプラスです。`
+            : `${formatGain(-delta)}/月 減額（${formatGain(current)} → ${formatGain(best)}）。今の現金繰りは楽になりますが、口座内の複利効果は小さくなります。`;
+        }
         if (delta > 0)
           return `Increase by ${formatGain(delta)}/mo (from ${formatGain(current)} to ${formatGain(best)}). More cash deferred today, but compounds at the account's growth rate — long-term win.`;
         return `Decrease by ${formatGain(-delta)}/mo (from ${formatGain(current)} to ${formatGain(best)}). Frees up cash flow now; the trade-off is less compounding inside the account.`;
@@ -1525,12 +1574,19 @@ export function generateAmountOptimizations(inputs) {
     const balance = Number(k.balance) || 0;
     if (balance <= 0 && current <= 0) return;
     sweep(
-      (best) => `Set 401k ${i + 1} contribution to ${formatGain(best)}/mo`,
+      (best) => ja
+        ? `401k ${i + 1} の拠出を ${formatGain(best)}/月 に設定`
+        : `Set 401k ${i + 1} contribution to ${formatGain(best)}/mo`,
       current,
       (adj, amt) => { adj.k401s[i] = { ...adj.k401s[i], monthlyContrib: amt }; },
       (best, current) => {
         const delta = best - current;
         const type = (k.accountType ?? 'traditional');
+        if (ja) {
+          if (delta > 0)
+            return `${formatGain(delta)}/月 増額（現在 ${formatGain(best)}）。${type === 'traditional' ? '税引前 — 手取りは減らず、残高にとって純粋にプラスです。' : 'Roth — 手取りから拠出しますが、非課税で複利運用されます。'}会社マッチがあれば、それに応じて増えます。`;
+          return `${formatGain(-delta)}/月 減額（現在 ${formatGain(best)}）。${type === 'traditional' ? '他の口座に回せる退職口座の枠が空きます。' : '今の現金繰りが回復します。'}`;
+        }
         if (delta > 0)
           return `Increase by ${formatGain(delta)}/mo (now ${formatGain(best)}). ${type === 'traditional' ? 'Pre-tax — does not reduce your take-home; pure win for the balance.' : 'Roth — comes from take-home but compounds tax-free.'} Match (if any) scales accordingly.`;
         return `Decrease by ${formatGain(-delta)}/mo (now ${formatGain(best)}). ${type === 'traditional' ? 'Frees up retirement-account headroom for other vehicles.' : 'Recovers cash flow today.'}`;
@@ -1544,12 +1600,24 @@ export function generateAmountOptimizations(inputs) {
   const monthlyP = Number(inputs.realEstate?.monthlyPayment) || 0;
   if (monthlyP > 0) {
     sweep(
-      (best) => best === 0
-        ? `Stop extra principal payments (was ${formatGain(extraP)}/mo)`
-        : `Set extra mortgage principal to ${formatGain(best)}/mo`,
+      (best) => ja
+        ? (best === 0
+            ? `繰上返済を停止（現在 ${formatGain(extraP)}/月）`
+            : `繰上返済を ${formatGain(best)}/月 に設定`)
+        : (best === 0
+            ? `Stop extra principal payments (was ${formatGain(extraP)}/mo)`
+            : `Set extra mortgage principal to ${formatGain(best)}/mo`),
       extraP,
       (adj, amt) => { adj.realEstate = { ...(adj.realEstate || {}), extraPrincipal: amt }; },
       (best, current) => {
+        if (ja) {
+          if (best === 0)
+            return `繰上返済をやめると ${formatGain(current * 12)}/年 が浮きます。一般的な7%の運用は住宅ローンの実効金利を上回ることが多く、長期的にはプラスです。`;
+          const delta = best - current;
+          if (delta > 0)
+            return `${formatGain(delta)}/月 増額。ローンの完済が早まり総支払利息は減りますが、投資に回せる現金が固定されます。`;
+          return `${formatGain(-delta)}/月 減額。現金繰りが楽になります。運用が住宅ローンの利息削減効果を上回る可能性があります。`;
+        }
         if (best === 0)
           return `Stopping extra principal frees up ${formatGain(current * 12)}/yr. Investments at typical 7% beat the mortgage's effective rate — usually a long-term win.`;
         const delta = best - current;
