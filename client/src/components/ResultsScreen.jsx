@@ -134,7 +134,7 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
       // Recommendations help fix FAILED plans. Optimizations help maximize
       // SUCCESSFUL plans. They're mutually exclusive — you'll see at most one.
       const recommendations = main.moneyRunOutAge !== null
-        ? generateRecommendations(data)
+        ? generateRecommendations(data, lang)
         : [];
       // Combine timing optimizations (sell age, SS age, etc.) AND amount
       // optimizations (UL premium, contributions, extra principal). Both
@@ -575,6 +575,7 @@ function AssetLifelineTable({ rows, retireAge, lifeExp }) {
 // change affected the outcome — with per-change attribution + cash flow.
 function ComparisonPanel({ comparison }) {
   const t = useT();
+  const { lang } = useLang();
   const { inputChanges, metrics, context, attributions } = comparison;
   const insights = generateInsights(inputChanges, metrics, context, attributions);
   const summary = summarizeImpact(metrics);
@@ -627,10 +628,10 @@ function ComparisonPanel({ comparison }) {
             </div>
             {inputChanges.slice(0, 50).map((c, i) => (
               <div key={i} className="impact-row">
-                <div className="impact-label">{friendlyLabel(c.path)}</div>
-                <div className="impact-before">{formatDiffValue(c.prev)}</div>
+                <div className="impact-label">{friendlyLabel(c.path, lang)}</div>
+                <div className="impact-before">{formatDiffValue(c.prev, lang)}</div>
                 <div className="impact-arrow">→</div>
-                <div className="impact-after">{formatDiffValue(c.curr)}</div>
+                <div className="impact-after">{formatDiffValue(c.curr, lang)}</div>
                 <div className="impact-delta"></div>
               </div>
             ))}

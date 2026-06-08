@@ -1131,10 +1131,14 @@ function deepClone(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
 
-export function generateRecommendations(inputs) {
+export function generateRecommendations(inputs, lang = 'en') {
   const main = simulate(inputs);
   if (main.moneyRunOutAge === null) return []; // plan already succeeds — no fixes needed
 
+  const ja = lang === 'ja';
+  const lifeExp = inputs.personal.lifeExpectancy;
+  // Shared "Money lasts through age X" impact line, localized.
+  const lastsStr = ja ? `資金が${lifeExp}歳まで持ちます` : `Money lasts through age ${lifeExp}`;
   const baselineFailureAge = main.moneyRunOutAge;
   const recs = [];
 
@@ -1144,9 +1148,11 @@ export function generateRecommendations(inputs) {
   if (possibleAge !== null && possibleAge > currentRetire) {
     const delay = possibleAge - currentRetire;
     recs.push({
-      title: `Delay retirement by ${delay} year${delay > 1 ? 's' : ''}`,
-      detail: `Retire at age ${possibleAge} instead of ${currentRetire}. Each extra working year adds savings AND shortens the drawdown period — usually the highest-impact fix.`,
-      impact: `Money lasts through age ${inputs.personal.lifeExpectancy}`,
+      title: ja ? `退職を${delay}年遅らせる` : `Delay retirement by ${delay} year${delay > 1 ? 's' : ''}`,
+      detail: ja
+        ? `${currentRetire}歳ではなく${possibleAge}歳で退職します。就労年が1年増えるごとに貯蓄が増え、取り崩し期間も短くなります — 通常もっとも効果の大きい改善策です。`
+        : `Retire at age ${possibleAge} instead of ${currentRetire}. Each extra working year adds savings AND shortens the drawdown period — usually the highest-impact fix.`,
+      impact: lastsStr,
       kind: 'success',
     });
   }
@@ -1173,15 +1179,19 @@ export function generateRecommendations(inputs) {
   }
   if (found !== null) {
     recs.push({
-      title: `Cut living expenses by ${found}%`,
-      detail: `Reduce housing, auto, grocery, insurance, medical, other, and travel costs by ${found}% across ALL age brackets. Smallest cut that makes the plan survive life expectancy.`,
-      impact: `Money lasts through age ${inputs.personal.lifeExpectancy}`,
+      title: ja ? `生活費を${found}%削減する` : `Cut living expenses by ${found}%`,
+      detail: ja
+        ? `すべての年齢帯で、住居・自動車・食費・保険・医療・その他・旅行費を${found}%削減します。プランが寿命まで持つために必要な最小の削減幅です。`
+        : `Reduce housing, auto, grocery, insurance, medical, other, and travel costs by ${found}% across ALL age brackets. Smallest cut that makes the plan survive life expectancy.`,
+      impact: lastsStr,
       kind: 'success',
     });
   } else {
     recs.push({
-      title: `Cut living expenses by 50%+`,
-      detail: `Even cutting expenses 50% won't save the plan on its own — likely needs to be combined with other fixes.`,
+      title: ja ? `生活費を50%以上削減する` : `Cut living expenses by 50%+`,
+      detail: ja
+        ? `支出を50%削減してもプラン単独では成立しません — 他の改善策との併用が必要と思われます。`
+        : `Even cutting expenses 50% won't save the plan on its own — likely needs to be combined with other fixes.`,
       kind: 'warning',
     });
   }
@@ -1194,17 +1204,23 @@ export function generateRecommendations(inputs) {
     const sim = simulate(adj);
     if (sim.moneyRunOutAge === null) {
       recs.push({
-        title: `Delay Social Security to age 70`,
-        detail: `Both spouses claim SS at 70 instead of earlier. Boosts monthly benefits by up to 24%. Note: you'd need other assets to bridge the gap until 70.`,
-        impact: `Money lasts through age ${inputs.personal.lifeExpectancy}`,
+        title: ja ? `社会保障（SS）を70歳まで遅らせる` : `Delay Social Security to age 70`,
+        detail: ja
+          ? `夫婦とも早期ではなく70歳でSSを受給します。月額給付が最大24%増えます。注意：70歳までの期間は他の資産で生活費を賄う必要があります。`
+          : `Both spouses claim SS at 70 instead of earlier. Boosts monthly benefits by up to 24%. Note: you'd need other assets to bridge the gap until 70.`,
+        impact: lastsStr,
         kind: 'success',
       });
     } else if (sim.moneyRunOutAge > baselineFailureAge) {
       const extra = sim.moneyRunOutAge - baselineFailureAge;
       recs.push({
-        title: `Delay Social Security to age 70`,
-        detail: `Doesn't fully fix the plan, but extends funded years by ${extra}. Useful when combined with another fix.`,
-        impact: `Money runs out at age ${sim.moneyRunOutAge} instead of ${baselineFailureAge}`,
+        title: ja ? `社会保障（SS）を70歳まで遅らせる` : `Delay Social Security to age 70`,
+        detail: ja
+          ? `プランを完全には解決しませんが、資金が持続する期間が${extra}年延びます。他の改善策と組み合わせると有効です。`
+          : `Doesn't fully fix the plan, but extends funded years by ${extra}. Useful when combined with another fix.`,
+        impact: ja
+          ? `資金が尽きる年齢が${baselineFailureAge}歳から${sim.moneyRunOutAge}歳に延びます`
+          : `Money runs out at age ${sim.moneyRunOutAge} instead of ${baselineFailureAge}`,
         kind: 'partial',
       });
     }
@@ -1234,9 +1250,13 @@ export function generateRecommendations(inputs) {
     if (savFound !== null) {
       const accountLabel = target.type === 'iras' ? `IRA ${target.idx + 1}` : `401k ${target.idx + 1}`;
       recs.push({
-        title: `Save an extra $${savFound.toLocaleString()}/month`,
-        detail: `Increase your monthly contribution to ${accountLabel} by $${savFound.toLocaleString()}. Compounding over remaining working years closes the gap.`,
-        impact: `Money lasts through age ${inputs.personal.lifeExpectancy}`,
+        title: ja
+          ? `毎月 $${savFound.toLocaleString()} 多く貯蓄する`
+          : `Save an extra $${savFound.toLocaleString()}/month`,
+        detail: ja
+          ? `${accountLabel} への毎月の拠出を $${savFound.toLocaleString()} 増やします。残りの就労期間の複利効果で不足を埋めます。`
+          : `Increase your monthly contribution to ${accountLabel} by $${savFound.toLocaleString()}. Compounding over remaining working years closes the gap.`,
+        impact: lastsStr,
         kind: 'success',
       });
     }

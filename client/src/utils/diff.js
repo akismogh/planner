@@ -129,16 +129,147 @@ const SUBFIELD_LABELS = {
   apr: 'APR (%)',
 };
 
+// ── Japanese label maps (mirror the English ones above) ──
+const FIELD_LABELS_JA = {
+  'personal.myDOB': '自分の生年月日',
+  'personal.wifeDOB': '配偶者の生年月日',
+  'personal.lifeExpectancy': '想定寿命（年齢）',
+  'personal.inflationRate': 'インフレ率（%）',
+  'personal.emergencyFund': '緊急予備資金',
+  'personal.autoDepleteRetirement': '退職口座を計画的に取り崩す',
+
+  'income.myIncome': '自分の月収（税引前）',
+  'income.myTaxRate': '自分の実効税率（%）',
+  'income.wifeIncome': '配偶者の月収（税引前）',
+  'income.wifeTaxRate': '配偶者の実効税率（%）',
+  'income.myRetirementAge': '自分の退職年齢',
+  'income.wifeRetirementAge': '配偶者の退職年齢',
+  'income.wifeRetireWithMe': '配偶者は自分と同時に退職',
+  'income.incomeGrowthRate': '年間収入成長率（%）',
+
+  'bankInvest.enabled': '余剰資金の自動運用：有効',
+  'bankInvest.threshold': '余剰資金の自動運用：しきい値',
+  'bankInvest.returnRate': '余剰資金の自動運用：期待利回り（%）',
+
+  'ul.surrenderValue': 'UL：現在の解約返戻金',
+  'ul.monthlyPremium': 'UL：毎月の保険料',
+  'ul.monthlyFee': 'UL：毎月の保険費用',
+  'ul.growthRate': 'UL：年間成長率（%）',
+  'ul.cancelAge': 'UL：解約年齢',
+
+  'realEstate.value': '不動産：現在価値',
+  'realEstate.loanBalance': '不動産：ローン残高',
+  'realEstate.apr': '不動産：金利 APR（%）',
+  'realEstate.monthlyPayment': '不動産：毎月の住宅ローン（元利）',
+  'realEstate.extraPrincipal': '不動産：毎月の繰上返済',
+  'realEstate.appreciationRate': '不動産：値上がり率（%）',
+  'realEstate.sellAge': '不動産：売却年齢',
+  'realEstate.saleFeeRate': '不動産：売却手数料（%）',
+  'realEstate.maintenanceRate': '不動産：維持費率（%）',
+
+  'ss.mySSAmount': '自分のSS月額給付（FRA時点）',
+  'ss.mySSAge': '自分のSS受給開始年齢',
+  'ss.wifeSSAmount': '配偶者のSS月額給付（FRA時点）',
+  'ss.wifeSSAge': '配偶者のSS受給開始年齢',
+
+  'japan.enabled': '日本移住：有効',
+  'japan.moveAge': '日本移住：年齢',
+  'japan.costMultiplier': '日本移住：生活費の係数',
+  'japan.withdrawalTaxRate': '日本移住：引き出し税率（%）',
+
+  'survivor.enabled': '遺族シナリオ：有効',
+  'survivor.whoFirst': '遺族シナリオ：先に亡くなるのは',
+  'survivor.eventAge': '遺族シナリオ：発生年齢',
+  'survivor.expenseFactor': '遺族シナリオ：支出係数',
+  'survivor.wifeLifeExpectancy': '遺族シナリオ：配偶者の想定寿命',
+
+  'rental.enabled': '賃貸オプション：有効',
+  'rental.startAge': '賃貸オプション：賃貸開始年齢',
+  'rental.oneTimeSetupCost': '賃貸オプション：一時的な初期費用',
+  'rental.monthlyRentIncome': '賃貸オプション：毎月の家賃収入',
+  'rental.annualRentIncrease': '賃貸オプション：年間家賃上昇率（%）',
+  'rental.monthlyMaintenanceRate': '賃貸オプション：維持費率（%）',
+  'rental.extraPrincipalDuringRental': '賃貸オプション：賃貸中の繰上返済',
+  'rental.sellAge': '賃貸オプション：賃貸物件の売却年齢',
+
+  'newHome.enabled': '新居：有効',
+  'newHome.purchaseAge': '新居：購入年齢',
+  'newHome.price': '新居：購入価格',
+  'newHome.downPayment': '新居：頭金',
+  'newHome.apr': '新居：住宅ローン金利（%）',
+  'newHome.loanTermYears': '新居：ローン期間（年）',
+  'newHome.appreciationRate': '新居：値上がり率（%）',
+  'newHome.maintenanceRate': '新居：維持費率（%）',
+  'newHome.sellAge': '新居：売却年齢',
+  'newHome.saleFeeRate': '新居：売却手数料率（%）',
+
+  'monteCarlo.enabled': 'モンテカルロ：有効',
+  'monteCarlo.runs': 'モンテカルロ：試行回数',
+  'monteCarlo.volatility': 'モンテカルロ：ボラティリティ（%）',
+};
+
+const ARRAY_LABELS_JA = {
+  banks: '銀行口座',
+  iras: 'IRA',
+  k401s: '401k',
+  expenseBrackets: '年齢帯',
+  oneTimeExpenses: '一時支出',
+  oneTimeIncomes: '一時収入',
+  vehicles: '車両',
+  loans: 'ローン',
+};
+
+const SUBFIELD_LABELS_JA = {
+  nickname: 'ニックネーム',
+  balance: '残高',
+  growthRate: '成長率（%）',
+  monthlyContrib: '毎月の積立額',
+  stopContribAge: '積立停止年齢',
+  earliestWithdrawalAge: '最早引き出し年齢',
+  accountType: '口座タイプ',
+  withdrawalTaxRate: '引き出し税率（%）',
+  companyMonthlyMatch: '会社の毎月マッチ',
+  fromAge: '開始年齢',
+  toAge: '終了年齢',
+  housing: '住居費（月）',
+  auto: '自動車（月）',
+  grocery: '食費（月）',
+  insurance: '保険（月）',
+  medical: '医療（月）',
+  other: 'その他（月）',
+  tripsPerYear: '旅行回数/年',
+  costPerTrip: '1回あたり費用',
+  additionalIncome: 'その他の月収',
+  description: '内容',
+  age: '年齢',
+  amount: '金額',
+  person: '対象者',
+  cost: 'コスト',
+  down: '頭金',
+  monthsToPay: '支払月数',
+  durationYears: '期間（年）',
+  apr: '金利 APR（%）',
+};
+
+// Known string-enum values, localized for the Before/After columns.
+const VALUE_LABELS_JA = {
+  self: '本人', wife: '配偶者', me: '自分',
+  traditional: 'Traditional', roth: 'Roth',
+  car: '車', motorcycle: 'バイク',
+};
+
 // Convert a dotted/bracketed path like "iras[0].balance" to a readable label.
-export function friendlyLabel(path) {
-  if (FIELD_LABELS[path]) return FIELD_LABELS[path];
+export function friendlyLabel(path, lang = 'en') {
+  const ja = lang === 'ja';
+  const fieldLabels = ja ? FIELD_LABELS_JA : FIELD_LABELS;
+  if (fieldLabels[path]) return fieldLabels[path];
 
   // Pattern: arrName[idx].field
   const arrMatch = path.match(/^(\w+)\[(\d+)\]\.(\w+)$/);
   if (arrMatch) {
     const [, arrName, idx, field] = arrMatch;
-    const arrLabel = ARRAY_LABELS[arrName] || arrName;
-    const fieldLabel = SUBFIELD_LABELS[field] || field;
+    const arrLabel = (ja ? ARRAY_LABELS_JA : ARRAY_LABELS)[arrName] || arrName;
+    const fieldLabel = (ja ? SUBFIELD_LABELS_JA : SUBFIELD_LABELS)[field] || field;
     return `${arrLabel} ${Number(idx) + 1} → ${fieldLabel}`;
   }
   return path;
@@ -220,13 +351,15 @@ function walk(a, b, path, out) {
 }
 
 // Pretty-format a value for display in the diff list.
-export function formatDiffValue(v) {
-  if (v === null || v === undefined || v === '') return '(empty)';
-  if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+export function formatDiffValue(v, lang = 'en') {
+  const ja = lang === 'ja';
+  if (v === null || v === undefined || v === '') return ja ? '（空）' : '(empty)';
+  if (typeof v === 'boolean') return ja ? (v ? 'はい' : 'いいえ') : (v ? 'Yes' : 'No');
   if (typeof v === 'number') {
     // Distinguish money-ish values: heuristically, if abs > 100, show with commas.
     if (Math.abs(v) >= 100) return v.toLocaleString('en-US');
     return String(v);
   }
+  if (ja && VALUE_LABELS_JA[v]) return VALUE_LABELS_JA[v];
   return String(v);
 }
