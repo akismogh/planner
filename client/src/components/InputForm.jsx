@@ -1840,6 +1840,14 @@ function ScenarioCard({ slotIdx, scenario, handlers }) {
 function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, onRemove }) {
   const t = useT();
   const tr = useUITranslate();
+  const { lang } = useLang();
+  const ja = lang === 'ja';
+  // Localized "(until/starts/ends age N)" annotations + "X contribution" for the
+  // ongoing-cost labels below (built dynamically, so they can't go through tr()).
+  const untilAge = (age) => (ja ? `（${age}歳まで）` : ` (until age ${age})`);
+  const startsAge = (age) => (ja ? `（${age}歳開始）` : ` (starts age ${age})`);
+  const endsAge = (age) => (ja ? `（${age}歳終了）` : ` (ends age ${age})`);
+  const contribOf = (name) => (ja ? `${name} 拠出` : `${name} contribution`);
   const f = (key) => (v) => setBracket({ ...bracket, [key]: v });
   const from = Number(bracket.fromAge) || 0;
   const to = Number(bracket.toAge) || 0;
@@ -1901,10 +1909,10 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
     if (totalMortgage > 0) {
       const stopAge = sellAge > 0 ? sellAge : 999;
       if (stopAge > from) {
-        const annotation = stopAge <= to ? ` (until age ${stopAge})` : '';
+        const annotation = stopAge <= to ? untilAge(stopAge) : '';
         const label = extraPrincipal > 0
-          ? `Mortgage P&I + extra principal${annotation}`
-          : `Mortgage P&I${annotation}`;
+          ? (ja ? `住宅ローン（元利）＋繰上返済${annotation}` : `Mortgage P&I + extra principal${annotation}`)
+          : (ja ? `住宅ローン（元利）${annotation}` : `Mortgage P&I${annotation}`);
         ongoingCosts.push({ label, amount: totalMortgage });
       }
     }
@@ -1915,8 +1923,8 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
     if (ulPremium > 0) {
       const stopAge = ulCancel > 0 ? ulCancel : 999;
       if (stopAge > from) {
-        const annotation = stopAge <= to ? ` (until age ${stopAge})` : '';
-        ongoingCosts.push({ label: `UL premium${annotation}`, amount: ulPremium });
+        const annotation = stopAge <= to ? untilAge(stopAge) : '';
+        ongoingCosts.push({ label: `${ja ? 'UL保険料' : 'UL premium'}${annotation}`, amount: ulPremium });
       }
     }
 
@@ -1926,9 +1934,9 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
       if (contrib <= 0) return;
       const stopAge = Math.min(Number(ira.stopContribAge) || 0, myRetire);
       if (stopAge > from) {
-        const annotation = stopAge <= to ? ` (until age ${stopAge})` : '';
+        const annotation = stopAge <= to ? untilAge(stopAge) : '';
         const name = ira.nickname ? `IRA: ${ira.nickname}` : `IRA ${i + 1}`;
-        ongoingCosts.push({ label: `${name} contribution${annotation}`, amount: contrib });
+        ongoingCosts.push({ label: `${contribOf(name)}${annotation}`, amount: contrib });
       }
     });
 
@@ -1941,9 +1949,11 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
       if (!isRoth) return;
       const stopAge = Math.min(Number(k.stopContribAge) || 0, myRetire);
       if (stopAge > from) {
-        const annotation = stopAge <= to ? ` (until age ${stopAge})` : '';
-        const name = k.nickname ? `401k Roth: ${k.nickname}` : `401k ${i + 1} (Roth)`;
-        ongoingCosts.push({ label: `${name} contribution${annotation}`, amount: contrib });
+        const annotation = stopAge <= to ? untilAge(stopAge) : '';
+        const name = k.nickname
+          ? `401k Roth: ${k.nickname}`
+          : (ja ? `401k ${i + 1}（Roth）` : `401k ${i + 1} (Roth)`);
+        ongoingCosts.push({ label: `${contribOf(name)}${annotation}`, amount: contrib });
       }
     });
 
@@ -1958,10 +1968,10 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
       if (rentStart > 0 && rentStart <= to && rentEnd > from) {
         const rentMonthly = Number(rental.monthlyRentIncome) || 0;
         if (rentMonthly > 0) {
-          const startAnnotation = rentStart > from ? ` (starts age ${rentStart})` : '';
-          const endAnnotation = rentEnd <= to ? ` (ends age ${rentEnd})` : '';
+          const startAnnotation = rentStart > from ? startsAge(rentStart) : '';
+          const endAnnotation = rentEnd <= to ? endsAge(rentEnd) : '';
           ongoingCosts.push({
-            label: `🏘️ Rental income${startAnnotation}${endAnnotation}`,
+            label: `🏘️ ${ja ? '家賃収入' : 'Rental income'}${startAnnotation}${endAnnotation}`,
             amount: -rentMonthly, // negative because it's INCOME, reduces net outflow
           });
         }
@@ -1981,9 +1991,9 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
       if (monthly <= 0) return;
       const endAge = startAge + durationYears - 1;
       if (startAge <= to && endAge >= from) {
-        const label = loan.description || `Loan`;
-        const startAnnotation = startAge > from ? ` (starts age ${startAge})` : '';
-        const endAnnotation = endAge <= to ? ` (ends age ${endAge})` : '';
+        const label = loan.description || (ja ? 'ローン' : 'Loan');
+        const startAnnotation = startAge > from ? startsAge(startAge) : '';
+        const endAnnotation = endAge <= to ? endsAge(endAge) : '';
         ongoingCosts.push({
           label: `🏦 ${label}${startAnnotation}${endAnnotation}`,
           amount: monthly,
@@ -2008,11 +2018,13 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
       const endAge = purchaseAge + yearsOfLoan - 1;
       if (purchaseAge <= to && endAge >= from) {
         const icon = v.description === 'motorcycle' ? '🏍️' : '🚗';
-        const owner = v.person === 'wife' ? 'wife' : 'self';
-        const startAnnotation = purchaseAge > from ? ` (starts age ${purchaseAge})` : '';
-        const endAnnotation = endAge <= to ? ` (ends age ${endAge})` : '';
+        const owner = ja
+          ? (v.person === 'wife' ? '配偶者' : '本人')
+          : (v.person === 'wife' ? 'wife' : 'self');
+        const startAnnotation = purchaseAge > from ? startsAge(purchaseAge) : '';
+        const endAnnotation = endAge <= to ? endsAge(endAge) : '';
         ongoingCosts.push({
-          label: `${icon} Vehicle loan — ${owner}${startAnnotation}${endAnnotation}`,
+          label: `${icon} ${ja ? '車両ローン' : 'Vehicle loan'} — ${owner}${startAnnotation}${endAnnotation}`,
           amount: monthly,
         });
       }
@@ -2162,7 +2174,7 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
             <> · <strong style={{ color: '#831843' }}>{tr('after relocation:')} {fmt$(totalMonthlyAfter * 12)} {tr('total cost')}
             {otherIncome > 0 && <> · {fmt$(netMonthlyAfter * 12)} {tr('net')}</>}</strong></>
           )}
-          {ongoingCosts.some((c) => c.label.includes('until age')) && (
+          {ongoingCosts.some((c) => c.label.includes('until age') || c.label.includes('歳まで')) && (
             <> · <strong>{tr('Note:')}</strong> {tr('some ongoing costs end mid-bracket — your actual cost drops at those ages.')}</>
           )}
           <br /><em>{tr('(today\'s dollars; inflation and mid-bracket drop-offs are applied year-by-year)')}</em>
