@@ -1585,23 +1585,32 @@ function SummaryItem({ label, value }) {
 function LoadedSummary({ scenario, onDismiss }) {
   const t = useT();
   const { lang } = useLang();
+  const ja = lang === 'ja';
   const d = scenario?.data;
   if (!d) return null;
 
   const p = d.personal || {};
   const inc = d.income || {};
+  const ss = d.ss || {};
+  const re = d.realEstate || {};
+  const banks = d.banks || [];
+  const iras = d.iras || [];
+  const k401s = d.k401s || [];
 
   // Current age shown next to each DOB, mirroring the DateField wording.
   const ageNote = (dob) => {
     const a = ageFromDOB(dob);
     if (!a) return '';
-    return lang === 'ja' ? `（現在 ${a}歳）` : `(currently ${a})`;
+    return ja ? `（現在 ${a}歳）` : `(currently ${a})`;
   };
+  const pct = (v) => (v || v === 0 ? `${v}%` : '—');
+  const ageOr = (v) => (Number(v) > 0 ? String(v) : '—');
+  const countNote = (n) => (ja ? `（${n}口座）` : `(${n})`);
 
-  const bankTotal = (d.banks || []).reduce((s, b) => s + (Number(b.balance) || 0), 0);
-  const retireTotal =
-    (d.iras || []).reduce((s, a) => s + (Number(a.balance) || 0), 0) +
-    (d.k401s || []).reduce((s, a) => s + (Number(a.balance) || 0), 0);
+  const sum = (arr) => arr.reduce((s, a) => s + (Number(a.balance) || 0), 0);
+  const bankTotal = sum(banks);
+  const iraTotal = sum(iras);
+  const k401Total = sum(k401s);
 
   // Spouse retirement age: either the explicit field, or "same time as me"
   // with the computed age when "spouse retires when I do" is on.
@@ -1613,13 +1622,23 @@ function LoadedSummary({ scenario, onDismiss }) {
         const computed = myA && spA && myRet ? myRet - (myA - spA) : '—';
         return `${computed} (${t('summary.sameAsMe')})`;
       })()
-    : (inc.wifeRetirementAge || '—');
+    : ageOr(inc.wifeRetirementAge);
+
+  const ssLine = (amt, age) =>
+    Number(amt) > 0
+      ? (ja ? `${fmtMoney0(amt)} ・ ${age}歳受給` : `${fmtMoney0(amt)} @ age ${age}`)
+      : '—';
+  const sellLabel = Number(re.sellAge) > 0 ? String(re.sellAge) : t('summary.noSell');
+
+  const hasSS = (Number(ss.mySSAmount) || 0) > 0 || (Number(ss.wifeSSAmount) || 0) > 0;
+  const hasHome = (Number(re.value) || 0) > 0;
+  const bracketCount = (d.expenseBrackets || []).length;
 
   const scenarioChips = [
-    d.japan?.enabled && t('summary.chip.relocation'),
+    d.japan?.enabled && `${t('summary.chip.relocation')} @ ${d.japan.moveAge} (×${d.japan.costMultiplier})`,
     d.rental?.enabled && t('summary.chip.rental'),
-    d.survivor?.enabled && t('summary.chip.survivor'),
-    d.monteCarlo?.enabled && t('summary.chip.monteCarlo'),
+    d.survivor?.enabled && `${t('summary.chip.survivor')} @ ${d.survivor.eventAge}`,
+    d.monteCarlo?.enabled && `${t('summary.chip.monteCarlo')} (${d.monteCarlo.runs})`,
   ].filter(Boolean);
 
   return (
@@ -1639,16 +1658,62 @@ function LoadedSummary({ scenario, onDismiss }) {
           ×
         </button>
       </div>
+
+      <div className="loaded-summary-subhead">{t('summary.sec.basics')}</div>
       <div className="loaded-summary-grid">
         <SummaryItem label={t('summary.myDOB')} value={`${p.myDOB || '—'} ${ageNote(p.myDOB)}`} />
         <SummaryItem label={t('summary.spouseDOB')} value={`${p.wifeDOB || '—'} ${ageNote(p.wifeDOB)}`} />
-        <SummaryItem label={t('summary.myRetireAge')} value={inc.myRetirementAge || '—'} />
+        <SummaryItem label={t('summary.myRetireAge')} value={ageOr(inc.myRetirementAge)} />
         <SummaryItem label={t('summary.spouseRetireAge')} value={spouseRetire} />
-        <SummaryItem label={t('summary.lifeExp')} value={p.lifeExpectancy || '—'} />
-        <SummaryItem label={t('summary.inflation')} value={`${p.inflationRate ?? '—'}%`} />
-        <SummaryItem label={t('summary.bankTotal')} value={fmtMoney0(bankTotal)} />
-        <SummaryItem label={t('summary.retireTotal')} value={fmtMoney0(retireTotal)} />
+        <SummaryItem label={t('summary.lifeExp')} value={ageOr(p.lifeExpectancy)} />
+        <SummaryItem label={t('summary.inflation')} value={pct(p.inflationRate)} />
+        <SummaryItem label={t('summary.emergencyFund')} value={fmtMoney0(p.emergencyFund)} />
+        <SummaryItem label={t('summary.autoDeplete')} value={p.autoDepleteRetirement ? t('opt.yes') : t('opt.no')} />
       </div>
+
+      <div className="loaded-summary-subhead">{t('summary.sec.income')}</div>
+      <div className="loaded-summary-grid">
+        <SummaryItem label={t('summary.myIncome')} value={fmtMoney0(inc.myIncome)} />
+        <SummaryItem label={t('summary.myTax')} value={pct(inc.myTaxRate)} />
+        <SummaryItem label={t('summary.spouseIncome')} value={fmtMoney0(inc.wifeIncome)} />
+        <SummaryItem label={t('summary.spouseTax')} value={pct(inc.wifeTaxRate)} />
+        <SummaryItem label={t('summary.incomeGrowth')} value={pct(inc.incomeGrowthRate)} />
+      </div>
+
+      <div className="loaded-summary-subhead">{t('summary.sec.savings')}</div>
+      <div className="loaded-summary-grid">
+        <SummaryItem label={t('summary.bankTotal')} value={`${fmtMoney0(bankTotal)} ${countNote(banks.length)}`} />
+        <SummaryItem label={t('summary.totalIRA')} value={`${fmtMoney0(iraTotal)} ${countNote(iras.length)}`} />
+        <SummaryItem label={t('summary.total401k')} value={`${fmtMoney0(k401Total)} ${countNote(k401s.length)}`} />
+      </div>
+
+      {hasSS && (
+        <>
+          <div className="loaded-summary-subhead">{t('summary.sec.ss')}</div>
+          <div className="loaded-summary-grid">
+            <SummaryItem label={t('summary.mySS')} value={ssLine(ss.mySSAmount, ss.mySSAge)} />
+            <SummaryItem label={t('summary.spouseSS')} value={ssLine(ss.wifeSSAmount, ss.wifeSSAge)} />
+          </div>
+        </>
+      )}
+
+      {hasHome && (
+        <>
+          <div className="loaded-summary-subhead">{t('summary.sec.home')}</div>
+          <div className="loaded-summary-grid">
+            <SummaryItem label={t('summary.homeValue')} value={fmtMoney0(re.value)} />
+            <SummaryItem label={t('summary.loanBalance')} value={fmtMoney0(re.loanBalance)} />
+            <SummaryItem label={t('summary.monthlyPayment')} value={fmtMoney0(re.monthlyPayment)} />
+            <SummaryItem label={t('summary.sellAge')} value={sellLabel} />
+          </div>
+        </>
+      )}
+
+      <div className="loaded-summary-subhead">{t('summary.sec.expenses')}</div>
+      <div className="loaded-summary-grid">
+        <SummaryItem label={t('summary.numRanges')} value={String(bracketCount)} />
+      </div>
+
       <div className="loaded-summary-scenarios">
         <span className="loaded-summary-sclabel">{t('summary.scenarios')}:</span>
         {scenarioChips.length > 0
@@ -1965,20 +2030,26 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
   const netMonthlyAfter = totalMonthlyAfter - otherIncome;
 
   return (
-    <div className="card">
-      <h4 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span>{rangeLabel}</span>
-        <span style={{ display: 'flex', gap: 6 }}>
+    <details className="card bracket-card">
+      <summary className="bracket-summary">
+        <span className="bracket-summary-label">{rangeLabel}</span>
+        <span className="bracket-summary-total" title={tr('TOTAL monthly cost')}>
+          {fmt$(totalMonthly)}<span className="bracket-summary-permo">/{tr('mo')}</span>
+        </span>
+        <span className="bracket-summary-actions">
           {onDuplicate && (
-            <button type="button" className="btn-primary-sm" onClick={onDuplicate}
+            <button type="button" className="btn-primary-sm"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDuplicate(); }}
               title="Insert a copy of this age range below">{tr('⧉ Duplicate')}</button>
           )}
           {onRemove && (
-            <button type="button" className="btn-danger-sm" onClick={onRemove}
+            <button type="button" className="btn-danger-sm"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRemove(); }}
               title="Remove this age range">{t('btn.remove')}</button>
           )}
         </span>
-      </h4>
+      </summary>
+      <div className="bracket-body">
       <div className="grid-2" style={{ marginBottom: 12 }}>
         <NumberField label="From age" value={bracket.fromAge}
           onChange={f('fromAge')} hint="inclusive" />
@@ -2097,6 +2168,7 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
           <br /><em>{tr('(today\'s dollars; inflation and mid-bracket drop-offs are applied year-by-year)')}</em>
         </div>
       </div>
-    </div>
+      </div>
+    </details>
   );
 }

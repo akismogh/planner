@@ -757,6 +757,57 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   color: var(--muted);
   font-style: italic;
 }
+/* Sub-section headers inside the expanded recap */
+.loaded-summary-subhead {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  margin: 16px 0 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #cfe0ff;
+}
+.loaded-summary-head + .loaded-summary-subhead { margin-top: 4px; }
+
+/* ── Collapsible expense brackets (age ranges) ── */
+.bracket-card { padding: 0; overflow: hidden; }
+.bracket-card > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  list-style: none;
+  user-select: none;
+}
+.bracket-card > summary::-webkit-details-marker { display: none; }
+.bracket-card > summary::before {
+  content: '▸';
+  color: var(--muted);
+  font-size: 11px;
+  flex: 0 0 auto;
+}
+.bracket-card[open] > summary::before { content: '▾'; }
+.bracket-card[open] > summary {
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--border);
+}
+.bracket-card > summary:hover { background: #f1f4f8; }
+.bracket-summary-label { color: var(--text); }
+.bracket-summary-total {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 13px;
+}
+.bracket-summary-permo { color: var(--muted); font-weight: 400; font-size: 11px; }
+.bracket-summary-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
+.bracket-body { padding: 12px 14px 14px; }
 
 .scenario-card {
   background: white;
