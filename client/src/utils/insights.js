@@ -10,6 +10,8 @@
 // 「この変更の最終純資産への寄与: $X」というサブ行が自動追加されます。
 // =====================================================================
 
+import { calcLoanPayment } from './calculations.js';
+
 const fmt = (n) => `$${Math.round(Number(n) || 0).toLocaleString('en-US')}`;
 const fmtSigned = (n) => {
   const v = Math.round(Number(n) || 0);
@@ -474,9 +476,13 @@ export function explainChange(change, context) {
     const [, idx, field] = vMatch;
     const num = Number(idx) + 1;
     const v = context.data?.vehicles?.[idx] || {};
-    const monthly = Number(v.monthlyAmount) || 0;
     const months = Number(v.monthsToPay) || 0;
-    const totalLoan = monthly * months;
+    // Monthly payment is auto-derived from cost − down financed over months at
+    // APR (matching the form/engine), not stored on the vehicle.
+    const financed = Math.max(0, (Number(v.cost) || 0) - (Number(v.down) || 0));
+    const monthly = financed > 0 && months > 0
+      ? calcLoanPayment(financed, months / 12, Number(v.apr) || 0)
+      : 0;
     if (field === 'age') return {
       text: `車両 #${num} の購入年齢を ${prev} → ${curr} に変更。`,
       details: [
@@ -493,9 +499,6 @@ export function explainChange(change, context) {
       details: [`購入年に銀行から差し引かれる金額が変わります（インフレ調整後）。`],
     };
     if (field === 'apr') {
-      const cost = Number(v.cost) || 0;
-      const down = Number(v.down) || 0;
-      const financed = Math.max(0, cost - down);
       return {
         text: `車両 #${num} の APR を ${prev}% → ${curr}% に変更。`,
         details: [

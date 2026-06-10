@@ -395,7 +395,6 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
                   🌏 {t('res.chipReloc')} {data.japan.moveAge} ·
                   {' '}{t('res.chipCostX')} {data.japan.costMultiplier} ·
                   {' '}{t('res.chipWdTax')} {data.japan.withdrawalTaxRate}%
-                  {data.japan.sellHouseOnMove && ` · ${t('res.chipHouseSold')}`}
                 </div>
               )}
               {survivorEnabled && (
