@@ -373,7 +373,27 @@ function migrateData(saved) {
     };
   }
 
+  // Strip orphaned fields left over from old versions so they don't linger in
+  // memory, get re-saved, or show up in exports. Applies to the working inputs
+  // AND every saved scenario snapshot (which exports embed). Idempotent.
+  pruneOrphans(out);
+  if (Array.isArray(out.scenarios)) {
+    out.scenarios.forEach((sc) => { if (sc && sc.data) pruneOrphans(sc.data); });
+  }
+
   return out;
+}
+
+// Fields removed in past refactors that may still sit in old saved/imported
+// data. Deleting them on load keeps memory, saves, and exports clean.
+function pruneOrphans(d) {
+  if (!d || typeof d !== 'object') return;
+  if (d.personal) delete d.personal.myRetirementAgeTarget;
+  if (d.income) delete d.income.retirePortfolioGrowthRate;
+  if (d.realEstate) delete d.realEstate.propertyTaxRate;
+  if (d.japan) delete d.japan.sellHouseOnMove;
+  (d.k401s || []).forEach((k) => { delete k.companyMatchPct; delete k.companyMatch; });
+  (d.vehicles || []).forEach((v) => { delete v.monthlyAmount; });
 }
 
 function deepMerge(base, override) {
