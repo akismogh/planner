@@ -219,7 +219,7 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
           onClick={onBack}
           title="Return to the input form — keyboard shortcut: Ctrl + ← or Alt + ←"
         >
-          ← {t('btn.back')} <span className="kbd-hint">Ctrl / Alt + ←</span>
+          {t('btn.back')} <span className="kbd-hint">Ctrl / Alt + ←</span>
         </button>
       </div>
 
