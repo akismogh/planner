@@ -682,7 +682,7 @@ export default function InputForm({
           const estIncome = excess * (rate / 100);
           const fmt = (n) => `$${Math.round(n).toLocaleString('en-US')}`;
           return (
-            <div className="card" style={{ borderColor: inv.enabled ? '#2ea043' : undefined }}>
+            <div className="card" style={{ borderColor: inv.enabled ? 'var(--green)' : undefined }}>
               <h4 style={{ marginBottom: 10 }}>
                 {t('h4.autoInvest')}{' '}
                 {inv.enabled
@@ -1076,8 +1076,8 @@ export default function InputForm({
             return mo > 0 ? (
               <p className="section-note" style={{ marginTop: 10, marginBottom: 0 }}>
                 {tr('Financed')}: <strong>${Math.round(financed).toLocaleString('en-US')}</strong> ·
-                {tr('Monthly P&I')}: <strong style={{ color: '#5b21b6' }}>${Math.round(mo).toLocaleString('en-US')}</strong> ·
-                {tr('Total interest')}: <strong style={{ color: '#b45309' }}>${Math.round(tot).toLocaleString('en-US')}</strong>
+                {tr('Monthly P&I')}: <strong style={{ color: 'var(--purple)' }}>${Math.round(mo).toLocaleString('en-US')}</strong> ·
+                {tr('Total interest')}: <strong style={{ color: 'var(--amber)' }}>${Math.round(tot).toLocaleString('en-US')}</strong>
               </p>
             ) : null;
           })()}
@@ -1098,7 +1098,7 @@ export default function InputForm({
             + travel costs scale by the multiplier, and retirement-account
             withdrawals use the relocation withdrawal tax rate. Each bracket
             below shows its cost before vs. after the move. */}
-        <div className="card" style={{ borderColor: data.japan?.enabled ? '#db2777' : undefined }}>
+        <div className="card" style={{ borderColor: data.japan?.enabled ? 'var(--amber)' : undefined }}>
           <h4 style={{ marginBottom: 10 }}>
             {t('h4.reloc')}{' '}
             {data.japan?.enabled
@@ -2103,7 +2103,7 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
         </div>
 
         {relocAffectsBracket && (
-          <div className="bracket-totals-row bracket-totals-subtotal" style={{ color: '#831843' }}>
+          <div className="bracket-totals-row bracket-totals-subtotal" style={{ color: '#a14708' }}>
             <span>
               {tr('🌏 Bracket subtotal after relocation')} (× {costMult})
               {relocMidBracket ? ` — ${tr('applies from age')} ${moveAge}` : ''}
@@ -2136,7 +2136,7 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
         </div>
 
         {relocAffectsBracket && (
-          <div className="bracket-totals-row bracket-totals-grandtotal" style={{ color: '#831843', borderTopColor: '#db2777' }}>
+          <div className="bracket-totals-row bracket-totals-grandtotal" style={{ color: '#a14708', borderTopColor: 'var(--amber)' }}>
             <span>
               {tr('🌏 TOTAL monthly cost after relocation')}
               {relocMidBracket ? ` — ${tr('from age')} ${moveAge}` : ''}
@@ -2159,7 +2159,7 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
               <span className="amount">{fmt$(netMonthly)}</span>
             </div>
             {relocAffectsBracket && (
-              <div className="bracket-totals-row bracket-totals-net" style={{ color: '#831843', borderTopColor: '#db2777' }}>
+              <div className="bracket-totals-row bracket-totals-net" style={{ color: '#a14708', borderTopColor: 'var(--amber)' }}>
                 <span>{tr('🌏 Net monthly outflow after relocation')}</span>
                 <span className="amount">{fmt$(netMonthlyAfter)}</span>
               </div>
@@ -2171,7 +2171,7 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
           {tr('Annual equivalent:')} {fmt$(totalMonthly * 12)} {tr('total cost')}
           {otherIncome > 0 && <> · {fmt$(otherIncome * 12)} {tr('income')} · {fmt$(netMonthly * 12)} {tr('net')}</>}
           {relocAffectsBracket && (
-            <> · <strong style={{ color: '#831843' }}>{tr('after relocation:')} {fmt$(totalMonthlyAfter * 12)} {tr('total cost')}
+            <> · <strong style={{ color: '#a14708' }}>{tr('after relocation:')} {fmt$(totalMonthlyAfter * 12)} {tr('total cost')}
             {otherIncome > 0 && <> · {fmt$(netMonthlyAfter * 12)} {tr('net')}</>}</strong></>
           )}
           {ongoingCosts.some((c) => c.label.includes('until age') || c.label.includes('歳まで')) && (

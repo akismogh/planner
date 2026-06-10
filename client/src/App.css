@@ -34,31 +34,36 @@
   cursor: pointer;
 }
 .lang-toggle button.active {
-  background: #1f6feb;
+  background: var(--accent);
   color: #fff;
 }
 .lang-toggle button:not(.active):hover { background: #eef2f7; }
 
 /* Base layout — designed for a comfortable 1080p experience. */
+/* Palette modeled on maa-recruit.jp: vivid blue on cool gray, deep navy
+   headings, pale sky tints, Poppins (Latin/numbers) + Noto Sans JP. */
 :root {
-  --bg: #f5f7fa;
+  --bg: #edeff4;
   --surface: #ffffff;
-  --border: #d8dee9;
-  --text: #1f2933;
-  --muted: #5a6675;
-  --accent: #1f6feb;
-  --accent-hover: #1858c4;
-  --green: #2ea043;
-  --red: #d04a3a;
-  --amber: #f0ad4e;
-  --purple: #8957e5;
+  --border: #d9deea;
+  --text: #2e2e2e;
+  --muted: #6b7385;
+  --accent: #002fff;
+  --accent-hover: #000e46;
+  --navy: #000e46;
+  --sky: #e3f6fd;
+  --green: #12a67b;
+  --red: #d6402b;
+  --amber: #f37530;
+  --purple: #4a5dd3;
 }
 
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  /* Poppins renders Latin text and digits; Noto Sans JP covers Japanese. */
+  font-family: 'Poppins', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
   font-size: 14px;
@@ -70,7 +75,22 @@ body {
   color: var(--muted);
 }
 
-h1 { margin: 0 0 4px; font-size: 24px; }
+h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--navy);
+  letter-spacing: 0.02em;
+}
+/* maa-style accent bar under page titles */
+h1::after {
+  content: '';
+  display: block;
+  width: 46px;
+  height: 4px;
+  background: var(--accent);
+  margin-top: 8px;
+}
 h4 { margin: 0 0 12px; font-size: 14px; color: var(--muted); }
 .subtitle { color: var(--muted); margin: 0 0 20px; }
 .subtitle code { background: #eef0f3; padding: 2px 6px; border-radius: 3px; }
@@ -98,7 +118,9 @@ details > summary {
   font-size: 15px;
   padding: 4px 0;
   user-select: none;
+  color: var(--navy);
 }
+details > summary:hover { color: var(--accent); }
 details[open] > summary { margin-bottom: 12px; }
 
 .card {
@@ -141,7 +163,7 @@ details[open] > summary { margin-bottom: 12px; }
 .field input:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(31, 111, 235, 0.15);
+  box-shadow: 0 0 0 2px rgba(0, 47, 255, 0.13);
 }
 
 .actions {
@@ -195,8 +217,8 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 .summary-card.highlight { border-color: var(--green); background: #f0faf2; }
 .summary-card.danger { border-color: var(--red); background: #fdf2f0; }
-.summary-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-.summary-value { font-size: 24px; font-weight: 700; margin-top: 4px; }
+.summary-label { font-size: 11px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.summary-value { font-size: 27px; font-weight: 600; color: var(--navy); margin-top: 4px; letter-spacing: 0.01em; }
 .summary-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
 .chart-wrapper {
@@ -426,7 +448,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 /* Highlight the "Remaining Liquid Assets" and "Total Net Worth" columns so
    they stand out from the rest of the year-by-year grid. */
 .results-table td.col-assets {
-  background: #eef5ff;
+  background: #e3f6fd;
   color: #1f4d8b;
   font-weight: 700;
 }
@@ -465,7 +487,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .field select:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(31, 111, 235, 0.15);
+  box-shadow: 0 0 0 2px rgba(0, 47, 255, 0.13);
 }
 
 /* Compact for 1080p */
@@ -504,9 +526,9 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .btn-save {
   padding: 7px 14px;
-  background: #f0f6ff;
-  color: #1f6feb;
-  border: 1.5px solid #1f6feb;
+  background: var(--sky);
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
   border-radius: 6px;
   font-size: 13px;
   font-weight: 600;
@@ -517,7 +539,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   text-align: center;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
-.btn-save:hover:not(:disabled) { background: #ddeeff; }
+.btn-save:hover:not(:disabled) { background: #cdeefb; }
 .btn-save:disabled { opacity: 0.55; cursor: not-allowed; }
 .btn-save.is-saved {
   background: #d1fae5;
@@ -532,7 +554,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .btn-calculate {
   padding: 7px 16px;
-  background: #1f6feb;
+  background: var(--accent);
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -541,7 +563,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   cursor: pointer;
   transition: background 0.15s;
 }
-.btn-calculate:hover { background: #1558c0; }
+.btn-calculate:hover { background: var(--navy); }
 
 /* Floating Back button on the Results screen. */
 .btn-back {
@@ -555,7 +577,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   cursor: pointer;
   transition: background 0.15s;
 }
-.btn-back:hover { background: #eef5ff; }
+.btn-back:hover { background: #e3f6fd; }
 
 /* Inline keyboard-shortcut hint, used on Calculate and Back buttons. */
 .kbd-hint {
@@ -625,21 +647,21 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   flex-wrap: wrap;
   margin: 0 0 16px;
   padding: 10px 14px;
-  background: #f0fdf4;
-  border: 1px solid #86efac;
+  background: var(--sky);
+  border: 1px solid #aadcf2;
   border-radius: 6px;
 }
 .btn-data {
   padding: 7px 14px;
   background: white;
-  border: 1px solid #16a34a;
-  color: #15803d;
+  border: 1px solid var(--accent);
+  color: var(--accent);
   border-radius: 5px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
 }
-.btn-data:hover { background: #dcfce7; }
+.btn-data:hover { background: #cdeefb; }
 .data-toolbar-note { font-size: 12px; color: #4b5563; }
 
 /* ── Saved scenarios bar (top of input form) ─────────────────────────────── */
@@ -671,8 +693,8 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* ── Loaded-scenario key-settings recap ── */
 .loaded-summary {
-  background: #f3f8ff;
-  border: 1px solid #bcd6ff;
+  background: var(--sky);
+  border: 1px solid #aadcf2;
   border-left: 4px solid var(--accent);
   border-radius: 6px;
   padding: 12px 16px 14px;
@@ -732,7 +754,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .loaded-summary-scenarios {
   margin-top: 12px;
   padding-top: 10px;
-  border-top: 1px dashed #bcd6ff;
+  border-top: 1px dashed #aadcf2;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -747,7 +769,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   font-size: 12px;
   font-weight: 600;
   background: #fff;
-  border: 1px solid #bcd6ff;
+  border: 1px solid #aadcf2;
   color: var(--accent);
   border-radius: 999px;
   padding: 2px 10px;
@@ -766,7 +788,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   color: var(--accent);
   margin: 16px 0 8px;
   padding-bottom: 4px;
-  border-bottom: 1px solid #cfe0ff;
+  border-bottom: 1px solid #aadcf2;
 }
 .loaded-summary-head + .loaded-summary-subhead { margin-top: 4px; }
 
@@ -832,7 +854,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   transition: background 0.15s, border-color 0.15s;
 }
 .scenario-card.scenario-empty:hover {
-  background: #eef5ff;
+  background: #e3f6fd;
   border-color: var(--accent);
   color: var(--accent);
 }
@@ -844,8 +866,9 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .scenario-empty-label { font-size: 11px; }
 
 .scenario-card.scenario-filled {
-  background: linear-gradient(180deg, #fffbeb 0%, #fff 50%);
-  border-color: #f0c95f;
+  background: #fff;
+  border-color: #c4cce4;
+  border-top: 3px solid var(--accent);
 }
 .scenario-name {
   font-weight: 700;
@@ -854,7 +877,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   line-height: 1.2;
 }
 .scenario-note {
-  color: #5a4a1f;
+  color: var(--muted);
   font-size: 11px;
   line-height: 1.4;
   display: -webkit-box;
@@ -899,7 +922,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .scenario-card.scenario-editing {
   border-color: var(--accent);
-  background: #eef5ff;
+  background: #e3f6fd;
 }
 .scenario-name-input,
 .scenario-note-input {
@@ -915,14 +938,14 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* ── Form group headers (visually cluster related sections) ──────────────── */
 .form-group-header {
-  margin: 30px 0 12px;
-  padding-bottom: 6px;
-  font-size: 13px;
+  margin: 34px 0 14px;
+  padding: 2px 0 2px 12px;
+  font-size: 15px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: var(--accent);
-  border-bottom: 2px solid var(--accent);
+  letter-spacing: 0.05em;
+  color: var(--navy);
+  border-left: 4px solid var(--accent);
 }
 .form-group-header:first-of-type { margin-top: 10px; }
 
@@ -936,7 +959,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* ── Inflation note on results screen ────────────────────────────────────── */
 .inflation-note {
-  background: #eef5ff;
+  background: #e3f6fd;
   border-left: 4px solid var(--accent);
   padding: 10px 14px;
   margin: 0 0 16px;
@@ -1263,7 +1286,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .bracket-totals {
   margin-top: 12px;
   padding: 10px 14px;
-  background: #f0f6ff;
+  background: var(--sky);
   border: 1px solid #c7d8f0;
   border-radius: 5px;
   font-size: 13px;
@@ -1289,11 +1312,11 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 .bracket-totals-subtotal .amount { font-size: 15px; }
 .bracket-totals-net {
-  border-top: 2px solid #1f6feb;
+  border-top: 2px solid var(--accent);
   margin-top: 4px;
   padding-top: 6px;
   font-weight: 700;
-  color: #1f6feb;
+  color: var(--accent);
 }
 .bracket-totals-net .amount { font-size: 16px; }
 .bracket-totals-divider {
@@ -1309,7 +1332,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .bracket-totals-row.ongoing-row { color: #5a3a8b; }
 .bracket-totals-row.ongoing-row .amount { color: #5a3a8b; }
 .bracket-totals-grandtotal {
-  border-top: 2px solid #1f6feb;
+  border-top: 2px solid var(--accent);
   margin-top: 6px;
   padding-top: 8px;
   font-weight: 700;
@@ -1369,7 +1392,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   outline: none;
   border-color: var(--accent);
   background: white;
-  box-shadow: 0 0 0 2px rgba(31, 111, 235, 0.1);
+  box-shadow: 0 0 0 2px rgba(0, 47, 255, 0.1);
 }
 .onetime-row-disabled {
   background: #f8fafc;
@@ -1399,7 +1422,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   outline: none;
   border-color: var(--accent);
   background: white;
-  box-shadow: 0 0 0 2px rgba(31, 111, 235, 0.1);
+  box-shadow: 0 0 0 2px rgba(0, 47, 255, 0.1);
 }
 .onetime-row input[type="number"] {
   text-align: right;
@@ -1472,7 +1495,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   outline: none;
   border-color: var(--accent);
   background: white;
-  box-shadow: 0 0 0 2px rgba(31, 111, 235, 0.1);
+  box-shadow: 0 0 0 2px rgba(0, 47, 255, 0.1);
 }
 .vehicle-row > input[type="number"] { text-align: right; }
 
@@ -1530,7 +1553,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   outline: none;
   border-color: var(--accent);
   background: white;
-  box-shadow: 0 0 0 2px rgba(31, 111, 235, 0.1);
+  box-shadow: 0 0 0 2px rgba(0, 47, 255, 0.1);
 }
 .loan-row > input[type="number"] { text-align: right; }
 .loan-monthly {
@@ -1593,7 +1616,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   font-size: 14px;
 }
 .lifeline-row.is-retire { background: #fff7e0; }
-.lifeline-row.is-life { background: #eef5ff; }
+.lifeline-row.is-life { background: #e3f6fd; }
 .lifeline-row.is-danger { background: #fdf2f0; }
 .lifeline-row.is-danger .lifeline-liquid,
 .lifeline-row.is-danger .lifeline-net { color: var(--red); }
@@ -1612,11 +1635,11 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   letter-spacing: 0.3px;
 }
 .tag-retire { background: #f0ad4e; color: white; }
-.tag-life { background: #1f6feb; color: white; }
+.tag-life { background: var(--accent); color: white; }
 .lifeline-liquid {
   font-weight: 700;
   font-size: 16px;
-  color: #1f6feb;
+  color: var(--accent);
 }
 .lifeline-net {
   font-weight: 600;
