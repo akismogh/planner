@@ -1,0 +1,343 @@
+{
+  "personal": {
+    "myDOB": "1977-11-11",
+    "spouseDOB": "1978-12-12",
+    "lifeExpectancy": 100,
+    "inflationRate": 2.5,
+    "emergencyFund": 0,
+    "autoDepleteRetirement": true
+  },
+  "income": {
+    "myIncome": 6060,
+    "myTaxRate": 34,
+    "spouseIncome": 3030,
+    "spouseTaxRate": 34,
+    "myRetirementAge": 54,
+    "spouseRetirementAge": 53,
+    "spouseRetireWithMe": true,
+    "incomeGrowthRate": 1
+  },
+  "banks": [
+    {
+      "nickname": "Citi",
+      "balance": 123456.78,
+      "growthRate": 2
+    },
+    {
+      "nickname": "Bank of America",
+      "balance": 43210.09,
+      "growthRate": 1.5
+    },
+    {
+      "nickname": "Wells Fargo",
+      "balance": 20000,
+      "growthRate": 1
+    }
+  ],
+  "bankInvest": {
+    "enabled": true,
+    "threshold": 30000,
+    "returnRate": 5
+  },
+  "ul": {
+    "surrenderValue": 120000.09,
+    "monthlyPremium": 300,
+    "monthlyFee": 30,
+    "growthRate": 8,
+    "cancelAge": 60
+  },
+  "iras": [
+    {
+      "nickname": "IRA-1",
+      "balance": 40000.44,
+      "monthlyContrib": 100,
+      "growthRate": 5.5,
+      "stopContribAge": 60,
+      "accountType": "traditional",
+      "withdrawalTaxRate": 9,
+      "earliestWithdrawalAge": 60
+    },
+    {
+      "nickname": "IRA-2",
+      "balance": 30000.33,
+      "monthlyContrib": 150,
+      "growthRate": 3.5,
+      "stopContribAge": 60,
+      "accountType": "roth",
+      "withdrawalTaxRate": 0,
+      "earliestWithdrawalAge": 60
+    },
+    {
+      "nickname": "IRA-3",
+      "balance": 5000.55,
+      "monthlyContrib": 0,
+      "growthRate": 2,
+      "stopContribAge": 0,
+      "accountType": "traditional",
+      "withdrawalTaxRate": 9,
+      "earliestWithdrawalAge": 60
+    }
+  ],
+  "k401s": [
+    {
+      "nickname": "John Hancock",
+      "balance": 39987.89,
+      "monthlyContrib": 0,
+      "companyMonthlyMatch": 0,
+      "growthRate": 5,
+      "stopContribAge": 0,
+      "accountType": "traditional",
+      "withdrawalTaxRate": 10,
+      "earliestWithdrawalAge": 60
+    },
+    {
+      "nickname": "Principle",
+      "balance": 988.84,
+      "monthlyContrib": 180,
+      "companyMonthlyMatch": 160,
+      "growthRate": 5,
+      "stopContribAge": 54,
+      "accountType": "traditional",
+      "withdrawalTaxRate": 10,
+      "earliestWithdrawalAge": 60
+    }
+  ],
+  "realEstate": {
+    "value": 777777.77,
+    "loanBalance": 222222.22,
+    "apr": 3.33,
+    "monthlyPayment": 2424.66,
+    "extraPrincipal": 500,
+    "appreciationRate": 5,
+    "sellAge": 54,
+    "saleFeeRate": 6,
+    "maintenanceRate": 1
+  },
+  "rental": {
+    "enabled": false,
+    "startAge": 65,
+    "oneTimeSetupCost": 40000,
+    "monthlyRentIncome": 3000,
+    "annualRentIncrease": 2,
+    "monthlyMaintenanceRate": 3,
+    "extraPrincipalDuringRental": 0,
+    "sellAge": 65
+  },
+  "newHome": {
+    "enabled": false,
+    "purchaseAge": 60,
+    "price": 0,
+    "downPayment": 0,
+    "apr": 5.5,
+    "loanTermYears": 30,
+    "appreciationRate": 3,
+    "maintenanceRate": 1,
+    "sellAge": 0,
+    "saleFeeRate": 6
+  },
+  "ss": {
+    "mySSAmount": 3000,
+    "mySSAge": 70,
+    "spouseSSAmount": 2000,
+    "spouseSSAge": 67
+  },
+  "expenseBrackets": [
+    {
+      "fromAge": 51,
+      "toAge": 54,
+      "housing": 0,
+      "auto": 400,
+      "grocery": 500,
+      "insurance": 1000,
+      "medical": 50,
+      "other": 2000,
+      "tripsPerYear": 1,
+      "costPerTrip": 3000,
+      "additionalIncome": 0
+    },
+    {
+      "fromAge": 55,
+      "toAge": 64,
+      "housing": 1500,
+      "auto": 0,
+      "grocery": 1000,
+      "insurance": 500,
+      "medical": 500,
+      "other": 2000,
+      "tripsPerYear": 1,
+      "costPerTrip": 3000,
+      "additionalIncome": 0
+    },
+    {
+      "fromAge": 65,
+      "toAge": 74,
+      "housing": 2200,
+      "auto": 0,
+      "grocery": 700,
+      "insurance": 300,
+      "medical": 1000,
+      "other": 1500,
+      "tripsPerYear": 1,
+      "costPerTrip": 1500,
+      "additionalIncome": 0
+    },
+    {
+      "fromAge": 75,
+      "toAge": 100,
+      "housing": 2200,
+      "auto": 0,
+      "grocery": 300,
+      "insurance": 300,
+      "medical": 2500,
+      "other": 1000,
+      "tripsPerYear": 1,
+      "costPerTrip": 1500,
+      "additionalIncome": 0
+    },
+    {
+      "fromAge": 90,
+      "toAge": 100,
+      "housing": 2200,
+      "auto": 0,
+      "grocery": 300,
+      "insurance": 300,
+      "medical": 2500,
+      "other": 1000,
+      "tripsPerYear": 1,
+      "costPerTrip": 1500,
+      "additionalIncome": 0
+    }
+  ],
+  "oneTimeExpenses": [
+    {
+      "enabled": true,
+      "description": "Dental",
+      "age": 50,
+      "amount": 6000
+    },
+    {
+      "enabled": true,
+      "description": "US/South America Trip",
+      "age": 54,
+      "amount": 20000
+    },
+    {
+      "enabled": true,
+      "description": "Move to Japan",
+      "age": 55,
+      "amount": 20000
+    },
+    {
+      "enabled": true,
+      "description": "World Trip 1",
+      "age": 55,
+      "amount": 80000
+    },
+    {
+      "enabled": true,
+      "description": "Senior Home",
+      "age": 75,
+      "amount": 200000
+    }
+  ],
+  "oneTimeIncomes": [
+    {
+      "enabled": true,
+      "description": "",
+      "age": 0,
+      "amount": 0
+    }
+  ],
+  "loans": [
+    {
+      "enabled": true,
+      "description": "",
+      "person": "self",
+      "age": 0,
+      "amount": 0,
+      "durationYears": 0,
+      "apr": 0
+    }
+  ],
+  "vehicles": [
+    {
+      "description": "car",
+      "person": "self",
+      "age": 54,
+      "cost": 40000,
+      "down": 40000,
+      "monthsToPay": 60,
+      "apr": 6
+    },
+    {
+      "description": "car",
+      "person": "spouse",
+      "age": 54,
+      "cost": 30000,
+      "down": 30000,
+      "monthsToPay": 60,
+      "apr": 6
+    },
+    {
+      "description": "motorcycle",
+      "person": "self",
+      "age": 55,
+      "cost": 15000,
+      "down": 15000,
+      "monthsToPay": 60,
+      "apr": 6
+    },
+    {
+      "description": "car",
+      "person": "self",
+      "age": 62,
+      "cost": 30000,
+      "down": 30000,
+      "monthsToPay": 60,
+      "apr": 6
+    },
+    {
+      "description": "car",
+      "person": "spouse",
+      "age": 63,
+      "cost": 30000,
+      "down": 30000,
+      "monthsToPay": 60,
+      "apr": 6
+    },
+    {
+      "description": "car",
+      "person": "self",
+      "age": 71,
+      "cost": 30000,
+      "down": 30000,
+      "monthsToPay": 60,
+      "apr": 6
+    }
+  ],
+  "japan": {
+    "enabled": true,
+    "moveAge": 54,
+    "costMultiplier": 1,
+    "withdrawalTaxRate": 20
+  },
+  "survivor": {
+    "enabled": false,
+    "eventAge": 80,
+    "whoFirst": "spouse",
+    "expenseFactor": 0.75,
+    "spouseLifeExpectancy": 92
+  },
+  "monteCarlo": {
+    "enabled": true,
+    "runs": 500,
+    "volatility": 15
+  },
+  "scenarios": [
+    null,
+    null,
+    null,
+    null,
+    null
+  ]
+}

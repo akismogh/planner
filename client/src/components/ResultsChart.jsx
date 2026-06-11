@@ -16,9 +16,9 @@ import { useUITranslate } from '../i18n.jsx';
 // (retire, relocation, survivor) leave `amount` undefined → no value shown.
 const EVENT_FLAGS = [
   { flag: 'flagRetireMe',        icon: '🎉', label: 'Retire (me)' },
-  { flag: 'flagRetireWife',      icon: '🎉', label: 'Retire (wife)' },
+  { flag: 'flagRetireSpouse',    icon: '🎉', label: 'Retire (spouse)' },
   { flag: 'flagSSStartMe',       icon: '🏦', label: 'SS starts (me)' },
-  { flag: 'flagSSStartWife',     icon: '🏦', label: 'SS starts (wife)' },
+  { flag: 'flagSSStartSpouse',   icon: '🏦', label: 'SS starts (spouse)' },
   { flag: 'flagRMDStart',        icon: '💰', label: 'RMDs begin' },
   { flag: 'flagULCancelled',     icon: '📃', label: 'UL cancelled',     amount: (r) => r.ulSurrenderProceeds, sign: 1 },
   { flag: 'flagRentalStart',     icon: '🏘️', label: 'Rental starts',    amount: (r) => r.rentalIncome,     sign: 1 },
@@ -62,7 +62,7 @@ function incomesForRow(r, tr = (x) => x) {
   const out = [];
   const add = (text, val) => { if (Number(val) > 0) out.push({ text, amount: Number(val) }); };
   add(tr('🏦 SS (me)'), r.mySS);
-  add(tr('🏦 SS (wife)'), r.wifeSS);
+  add(tr('🏦 SS (spouse)'), r.spouseSS);
   add(tr('📤 IRA withdrawals'), r.iraIncome);
   add(tr('📤 401k withdrawals'), r.k401Income);
   add(tr('💹 Investment income'), r.investIncome);

@@ -83,7 +83,7 @@ export function explainChange(change, context) {
   }
 
   // ── 収入 ───────────────────────────────────────────────────────────────
-  if (path === 'income.myIncome' || path === 'income.wifeIncome') {
+  if (path === 'income.myIncome' || path === 'income.spouseIncome') {
     const who = path === 'income.myIncome' ? 'あなた' : '配偶者';
     const yearly = delta * 12;
     const totalImpact = yearly * yearsToRetire;
@@ -118,7 +118,7 @@ export function explainChange(change, context) {
       ],
     };
   }
-  if (path === 'income.wifeRetirementAge') {
+  if (path === 'income.spouseRetirementAge') {
     return {
       text: `配偶者の退職年齢を ${prevN} → ${currN} に変更しました。`,
       details: [`配偶者の収入ストリームが ${delta > 0 ? `${delta} 年延長` : `${Math.abs(delta)} 年短縮`}されます。`],
@@ -135,7 +135,7 @@ export function explainChange(change, context) {
   }
 
   // ── SS ─────────────────────────────────────────────────────────────────
-  if (path === 'ss.mySSAge' || path === 'ss.wifeSSAge') {
+  if (path === 'ss.mySSAge' || path === 'ss.spouseSSAge') {
     const who = path === 'ss.mySSAge' ? 'あなた' : '配偶者';
     if (delta > 0) {
       return {
@@ -157,7 +157,7 @@ export function explainChange(change, context) {
       ],
     };
   }
-  if (path === 'ss.mySSAmount' || path === 'ss.wifeSSAmount') {
+  if (path === 'ss.mySSAmount' || path === 'ss.spouseSSAmount') {
     const who = path === 'ss.mySSAmount' ? 'あなた' : '配偶者';
     return {
       text: `${who}の SS 想定月額（FRA時点）を ${fmt(prevN)} → ${fmt(currN)} に変更。`,
@@ -543,7 +543,7 @@ export function explainChange(change, context) {
     details: curr ? ['指定年齢から、亡くなった方の収入と SS がなくなり、生存配偶者は大きい方の SS を継続受給。'] : [],
   };
   if (path === 'survivor.whoFirst') {
-    const labelMap = { wife: '配偶者が先に亡くなる', me: 'あなたが先に亡くなる' };
+    const labelMap = { spouse: '配偶者が先に亡くなる', me: 'あなたが先に亡くなる' };
     return {
       text: `サバイバーシナリオ：${labelMap[prev]} → ${labelMap[curr]}。`,
       details: [
@@ -559,7 +559,7 @@ export function explainChange(change, context) {
     text: `サバイバー時の支出係数を ${prev} → ${curr} に変更。`,
     details: [currN < prevN ? '単身世帯の生活費前提を引き締めました。' : '単身世帯の生活費前提を緩めました。'],
   };
-  if (path === 'survivor.wifeLifeExpectancy') return {
+  if (path === 'survivor.spouseLifeExpectancy') return {
     text: `サバイバーシナリオ内の配偶者の想定寿命を ${prev} → ${curr} に変更。`,
     details: [`「あなたが先に亡くなる」シナリオの場合のみ使用。シミュレーションが ${Math.abs(delta)} 年${delta > 0 ? '延長' : '短縮'}されます。`],
   };

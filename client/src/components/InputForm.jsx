@@ -14,12 +14,12 @@ export function defaultInputs() {
   return {
     personal: {
       myDOB: '',
-      wifeDOB: '',
+      spouseDOB: '',
       // Life expectancy. The simulation runs to MY life expectancy.
       // Without a survivor scenario, we assume both spouses reach this age
       // together (no single-household period). Wife's separate life
       // expectancy ONLY matters in the survivor scenario when I pass first —
-      // it's defined inside `survivor.wifeLifeExpectancy`.
+      // it's defined inside `survivor.spouseLifeExpectancy`.
       lifeExpectancy: 90,
       inflationRate: 3.0,
       // Minimum cash reserve to keep in bank accounts. Withdrawals stop
@@ -34,17 +34,17 @@ export function defaultInputs() {
       autoDepleteRetirement: false,
     },
     income: {
-      // myIncome / wifeIncome are now PRE-TAX (gross) monthly amounts.
+      // myIncome / spouseIncome are now PRE-TAX (gross) monthly amounts.
       // The simulator multiplies by (1 − taxRate) to get spendable take-home.
       myIncome: 0,
       myTaxRate: 25,
-      wifeIncome: 0,
-      wifeTaxRate: 25,
+      spouseIncome: 0,
+      spouseTaxRate: 25,
       myRetirementAge: 65,
-      wifeRetirementAge: 65,
+      spouseRetirementAge: 65,
       // When true, the spouse retires the same year I do (their age at that
-      // time), and `wifeRetirementAge` above is ignored.
-      wifeRetireWithMe: false,
+      // time), and `spouseRetirementAge` above is ignored.
+      spouseRetireWithMe: false,
       // Annual nominal growth of working income (raises + COLA).
       // Set equal to inflation for "real income stays flat" (typical assumption).
       // Set to 0 for "no raises" (nominal stays flat; real shrinks).
@@ -154,8 +154,8 @@ export function defaultInputs() {
     ss: {
       mySSAmount: 0,
       mySSAge: 67,
-      wifeSSAmount: 0,
-      wifeSSAge: 67,
+      spouseSSAmount: 0,
+      spouseSSAge: 67,
     },
     // Expense brackets are now an array of up to 5 user-defined age ranges.
     // Each has fromAge / toAge plus the per-category monthly costs. The
@@ -183,7 +183,7 @@ export function defaultInputs() {
     ],
     // 5 slots for loans (personal, HELOC, education, etc.). Each has:
     //   - description: free text (e.g. "Kids' college", "Kitchen reno HELOC")
-    //   - person: 'self' or 'wife' (informational)
+    //   - person: 'self' or 'spouse' (informational)
     //   - age: my age when the loan starts
     //   - amount: principal received (today's dollars, inflated to start year)
     //   - durationYears: loan term in YEARS
@@ -198,7 +198,7 @@ export function defaultInputs() {
     ],
     // 8 slots for vehicle purchases (cars / motorcycles). Each purchase has:
     //   - description: 'car' or 'motorcycle'
-    //   - person: 'self' or 'wife'
+    //   - person: 'self' or 'spouse'
     //   - age: my age at purchase
     //   - cost: total purchase price (used in loan calc)
     //   - down: cash paid at purchase (hits bank that year)
@@ -225,20 +225,20 @@ export function defaultInputs() {
       withdrawalTaxRate: 20,
     },
     // ── Survivor scenario ──
-    // At eventAge, one spouse passes — chosen by `whoFirst` ('wife' or 'me').
+    // At eventAge, one spouse passes — chosen by `whoFirst` ('spouse' or 'me').
     // The deceased's income ends, the surviving spouse keeps the LARGER of
     // the two SS checks (SSA survivor rule), and household living expenses
     // scale by expenseFactor (typically 0.70–0.80 for one person).
     //
-    // wifeLifeExpectancy is ONLY used when whoFirst === 'me' to extend the
+    // spouseLifeExpectancy is ONLY used when whoFirst === 'me' to extend the
     // simulation past my life expectancy (wife survives alone). Otherwise
     // we assume both reach my life expectancy together.
     survivor: {
       enabled: false,
       eventAge: 80,
-      whoFirst: 'wife',
+      whoFirst: 'spouse',
       expenseFactor: 0.75,
-      wifeLifeExpectancy: 92,
+      spouseLifeExpectancy: 92,
     },
     // ── Monte Carlo ──
     // Re-runs the simulation N times with randomized annual returns
@@ -586,8 +586,8 @@ export default function InputForm({
         <div className="grid-2">
           <DateField label="My date of birth" value={data.personal.myDOB}
             onChange={set(['personal', 'myDOB'])} required />
-          <DateField label={t('lbl.spouseDOB', "Spouse's date of birth")} value={data.personal.wifeDOB}
-            onChange={set(['personal', 'wifeDOB'])} required />
+          <DateField label={t('lbl.spouseDOB', "Spouse's date of birth")} value={data.personal.spouseDOB}
+            onChange={set(['personal', 'spouseDOB'])} required />
           <NumberField label="Life expectancy (age)" value={data.personal.lifeExpectancy}
             onChange={set(['personal', 'lifeExpectancy'])} required
             hint="when the simulation ends. Without a survivor scenario, both spouses are assumed to reach this age together" />
@@ -622,37 +622,37 @@ export default function InputForm({
             hint={t('hint.taxRate', 'combined fed + state + payroll, effective')} />
           <ReadoutField label={t('lbl.afterTax', 'Est. after-tax (monthly)')}
             value={fmtMoney0((Number(data.income.myIncome) || 0) * (1 - (Number(data.income.myTaxRate) || 0) / 100))} />
-          <NumberField label={t('lbl.spouseGrossIncome', "Spouse's monthly income (pre-tax)")} value={data.income.wifeIncome}
-            onChange={set(['income', 'wifeIncome'])} hint={t('hint.grossMonthly', 'gross / before taxes')} />
-          <NumberField label={t('lbl.spouseTaxRate', "Spouse's effective tax rate (%)")} value={data.income.wifeTaxRate}
-            onChange={set(['income', 'wifeTaxRate'])} step={0.5}
+          <NumberField label={t('lbl.spouseGrossIncome', "Spouse's monthly income (pre-tax)")} value={data.income.spouseIncome}
+            onChange={set(['income', 'spouseIncome'])} hint={t('hint.grossMonthly', 'gross / before taxes')} />
+          <NumberField label={t('lbl.spouseTaxRate', "Spouse's effective tax rate (%)")} value={data.income.spouseTaxRate}
+            onChange={set(['income', 'spouseTaxRate'])} step={0.5}
             hint={t('hint.taxRate', 'combined fed + state + payroll, effective')} />
           <ReadoutField label={t('lbl.afterTax', 'Est. after-tax (monthly)')}
-            value={fmtMoney0((Number(data.income.wifeIncome) || 0) * (1 - (Number(data.income.wifeTaxRate) || 0) / 100))} />
+            value={fmtMoney0((Number(data.income.spouseIncome) || 0) * (1 - (Number(data.income.spouseTaxRate) || 0) / 100))} />
           <NumberField label={t('lbl.myRetireAge', 'My retirement age')} value={data.income.myRetirementAge}
             onChange={set(['income', 'myRetirementAge'])} required
             hint={t('hint.retireAge', 'income stops; calculation also finds earliest possible age')} />
           <SelectField label={t('lbl.spouseRetireWithMe', 'Spouse retires when I do')}
-            value={data.income.wifeRetireWithMe ? 1 : 0}
-            onChange={(v) => set(['income', 'wifeRetireWithMe'])(Boolean(v))}
+            value={data.income.spouseRetireWithMe ? 1 : 0}
+            onChange={(v) => set(['income', 'spouseRetireWithMe'])(Boolean(v))}
             options={[
               { value: 0, label: 'No — set spouse age' },
               { value: 1, label: 'Yes — same time as me' },
             ]}
-            hint={data.income.wifeRetireWithMe ? tr('spouse stops working the year I retire') : undefined} />
-          {data.income.wifeRetireWithMe ? (
+            hint={data.income.spouseRetireWithMe ? tr('spouse stops working the year I retire') : undefined} />
+          {data.income.spouseRetireWithMe ? (
             <ReadoutField
               label={t('lbl.spouseRetireAgeComputed', "Spouse's age when I retire")}
               value={(() => {
                 const myA = ageFromDOB(data.personal.myDOB);
-                const spA = ageFromDOB(data.personal.wifeDOB);
+                const spA = ageFromDOB(data.personal.spouseDOB);
                 const myRet = Number(data.income.myRetirementAge) || 0;
                 if (!myA || !spA || !myRet) return '—';
                 return String(myRet - (myA - spA));
               })()} />
           ) : (
-            <NumberField label={t('lbl.spouseRetireAge', "Spouse's retirement age")} value={data.income.wifeRetirementAge}
-              onChange={set(['income', 'wifeRetirementAge'])} />
+            <NumberField label={t('lbl.spouseRetireAge', "Spouse's retirement age")} value={data.income.spouseRetirementAge}
+              onChange={set(['income', 'spouseRetirementAge'])} />
           )}
           <NumberField label={t('lbl.incomeGrowth', 'Annual income growth rate (%)')}
             value={data.income.incomeGrowthRate}
@@ -932,13 +932,13 @@ export default function InputForm({
           <h4>{t('lbl.spousePossessive', "Spouse's")}</h4>
           <div className="grid-2">
             <NumberField label="Estimated monthly benefit at FRA (67)"
-              value={data.ss.wifeSSAmount}
-              onChange={set(['ss', 'wifeSSAmount'])} />
+              value={data.ss.spouseSSAmount}
+              onChange={set(['ss', 'spouseSSAmount'])} />
             <SelectField label="Benefit start age"
-              value={data.ss.wifeSSAge}
-              onChange={set(['ss', 'wifeSSAge'])}
+              value={data.ss.spouseSSAge}
+              onChange={set(['ss', 'spouseSSAge'])}
               options={SS_AGE_OPTIONS}
-              hint={`adjusted: ${formatAdjusted(data.ss.wifeSSAmount, data.ss.wifeSSAge)} /mo`} />
+              hint={`adjusted: ${formatAdjusted(data.ss.spouseSSAmount, data.ss.spouseSSAge)} /mo`} />
           </div>
         </div>
       </details>
@@ -1366,7 +1366,7 @@ export default function InputForm({
                   value={loan.person || 'self'}
                   onChange={(ev) => set(['loans', i, 'person'])(ev.target.value)}>
                   <option value="self">{tr('Self')}</option>
-                  <option value="wife">{t('opt.spouse', 'Spouse')}</option>
+                  <option value="spouse">{t('opt.spouse', 'Spouse')}</option>
                 </select>
                 <input type="number" placeholder="age"
                   value={loan.age === 0 ? '' : loan.age}
@@ -1439,7 +1439,7 @@ export default function InputForm({
                   onChange={(ev) => set(['vehicles', i, 'person'])(ev.target.value)}
                 >
                   <option value="self">{tr('Self')}</option>
-                  <option value="wife">{t('opt.spouse', 'Spouse')}</option>
+                  <option value="spouse">{t('opt.spouse', 'Spouse')}</option>
                 </select>
                 <input type="number" placeholder="age"
                   value={v.age === 0 ? '' : v.age}
@@ -1492,10 +1492,10 @@ export default function InputForm({
               onChange={(v) => set(['survivor', 'enabled'])(Boolean(v))}
               options={[{ value: 0, label: t('opt.no', 'No') }, { value: 1, label: t('opt.yes', 'Yes') }]} />
             <SelectField label={t('lbl.whoFirst', 'Who passes first')}
-              value={data.survivor.whoFirst ?? 'wife'}
+              value={data.survivor.whoFirst ?? 'spouse'}
               onChange={set(['survivor', 'whoFirst'])}
               options={[
-                { value: 'wife', label: t('opt.spouseFirst', 'Spouse passes first (typical actuarial case)') },
+                { value: 'spouse', label: t('opt.spouseFirst', 'Spouse passes first (typical actuarial case)') },
                 { value: 'me',   label: t('opt.meFirst', 'I pass first') },
               ]} />
             <NumberField label={t('lbl.survivorEventAge', 'My age when event occurs')}
@@ -1508,8 +1508,8 @@ export default function InputForm({
               step={0.05}
               hint={t('hint.expenseFactor', "0.75 = 75% of couple's expenses; rule of thumb 0.70–0.80")} />
             <NumberField label={t('lbl.spouseLifeExp', "Spouse's life expectancy (age)")}
-              value={data.survivor.wifeLifeExpectancy}
-              onChange={set(['survivor', 'wifeLifeExpectancy'])}
+              value={data.survivor.spouseLifeExpectancy}
+              onChange={set(['survivor', 'spouseLifeExpectancy'])}
               hint={t('hint.spouseLifeExp', "only used if 'I pass first' — sim extends until spouse reaches this age")} />
           </div>
         </div>
@@ -1614,15 +1614,15 @@ function LoadedSummary({ scenario, onDismiss }) {
 
   // Spouse retirement age: either the explicit field, or "same time as me"
   // with the computed age when "spouse retires when I do" is on.
-  const spouseRetire = inc.wifeRetireWithMe
+  const spouseRetire = inc.spouseRetireWithMe
     ? (() => {
         const myA = ageFromDOB(p.myDOB);
-        const spA = ageFromDOB(p.wifeDOB);
+        const spA = ageFromDOB(p.spouseDOB);
         const myRet = Number(inc.myRetirementAge) || 0;
         const computed = myA && spA && myRet ? myRet - (myA - spA) : '—';
         return `${computed} (${t('summary.sameAsMe')})`;
       })()
-    : ageOr(inc.wifeRetirementAge);
+    : ageOr(inc.spouseRetirementAge);
 
   const ssLine = (amt, age) =>
     Number(amt) > 0
@@ -1630,7 +1630,7 @@ function LoadedSummary({ scenario, onDismiss }) {
       : '—';
   const sellLabel = Number(re.sellAge) > 0 ? String(re.sellAge) : t('summary.noSell');
 
-  const hasSS = (Number(ss.mySSAmount) || 0) > 0 || (Number(ss.wifeSSAmount) || 0) > 0;
+  const hasSS = (Number(ss.mySSAmount) || 0) > 0 || (Number(ss.spouseSSAmount) || 0) > 0;
   const hasHome = (Number(re.value) || 0) > 0;
   const bracketCount = (d.expenseBrackets || []).length;
 
@@ -1662,7 +1662,7 @@ function LoadedSummary({ scenario, onDismiss }) {
       <div className="loaded-summary-subhead">{t('summary.sec.basics')}</div>
       <div className="loaded-summary-grid">
         <SummaryItem label={t('summary.myDOB')} value={`${p.myDOB || '—'} ${ageNote(p.myDOB)}`} />
-        <SummaryItem label={t('summary.spouseDOB')} value={`${p.wifeDOB || '—'} ${ageNote(p.wifeDOB)}`} />
+        <SummaryItem label={t('summary.spouseDOB')} value={`${p.spouseDOB || '—'} ${ageNote(p.spouseDOB)}`} />
         <SummaryItem label={t('summary.myRetireAge')} value={ageOr(inc.myRetirementAge)} />
         <SummaryItem label={t('summary.spouseRetireAge')} value={spouseRetire} />
         <SummaryItem label={t('summary.lifeExp')} value={ageOr(p.lifeExpectancy)} />
@@ -1675,8 +1675,8 @@ function LoadedSummary({ scenario, onDismiss }) {
       <div className="loaded-summary-grid">
         <SummaryItem label={t('summary.myIncome')} value={fmtMoney0(inc.myIncome)} />
         <SummaryItem label={t('summary.myTax')} value={pct(inc.myTaxRate)} />
-        <SummaryItem label={t('summary.spouseIncome')} value={fmtMoney0(inc.wifeIncome)} />
-        <SummaryItem label={t('summary.spouseTax')} value={pct(inc.wifeTaxRate)} />
+        <SummaryItem label={t('summary.spouseIncome')} value={fmtMoney0(inc.spouseIncome)} />
+        <SummaryItem label={t('summary.spouseTax')} value={pct(inc.spouseTaxRate)} />
         <SummaryItem label={t('summary.incomeGrowth')} value={pct(inc.incomeGrowthRate)} />
       </div>
 
@@ -1692,7 +1692,7 @@ function LoadedSummary({ scenario, onDismiss }) {
           <div className="loaded-summary-subhead">{t('summary.sec.ss')}</div>
           <div className="loaded-summary-grid">
             <SummaryItem label={t('summary.mySS')} value={ssLine(ss.mySSAmount, ss.mySSAge)} />
-            <SummaryItem label={t('summary.spouseSS')} value={ssLine(ss.wifeSSAmount, ss.wifeSSAge)} />
+            <SummaryItem label={t('summary.spouseSS')} value={ssLine(ss.spouseSSAmount, ss.spouseSSAge)} />
           </div>
         </>
       )}
@@ -2019,8 +2019,8 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
       if (purchaseAge <= to && endAge >= from) {
         const icon = v.description === 'motorcycle' ? '🏍️' : '🚗';
         const owner = ja
-          ? (v.person === 'wife' ? '配偶者' : '本人')
-          : (v.person === 'wife' ? 'wife' : 'self');
+          ? (v.person === 'spouse' ? '配偶者' : '本人')
+          : (v.person === 'spouse' ? 'spouse' : 'self');
         const startAnnotation = purchaseAge > from ? startsAge(purchaseAge) : '';
         const endAnnotation = endAge <= to ? endsAge(endAge) : '';
         ongoingCosts.push({

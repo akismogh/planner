@@ -114,7 +114,7 @@ export default function App() {
     const errs = [];
     if (!d.personal.myDOB)
       errs.push(t('val.dobRequired'));
-    if (!d.personal.wifeDOB)
+    if (!d.personal.spouseDOB)
       errs.push(t('val.spouseDobRequired'));
     if (!d.personal.lifeExpectancy || d.personal.lifeExpectancy < 60)
       errs.push(t('val.lifeExpMin'));
@@ -360,17 +360,22 @@ function migrateData(saved) {
     out.vehicles = real.length ? real : out.vehicles.slice(0, 1);
   }
 
-  // wifeLifeExpectancy used to live in `personal`; now it's inside `survivor`
-  // because it's only relevant when the survivor scenario is enabled.
+  // spouseLifeExpectancy used to live in `personal` (as wifeLifeExpectancy);
+  // now it's inside `survivor` because it's only relevant when enabled.
   if (out.personal && out.personal.wifeLifeExpectancy !== undefined) {
     const wifeLE = out.personal.wifeLifeExpectancy;
     const { wifeLifeExpectancy: _drop, ...personalRest } = out.personal;
     out.personal = personalRest;
     out.survivor = {
       ...(out.survivor || {}),
-      // Don't overwrite if survivor already has it (just in case)
-      wifeLifeExpectancy: out.survivor?.wifeLifeExpectancy ?? wifeLE,
+      spouseLifeExpectancy: out.survivor?.spouseLifeExpectancy ?? out.survivor?.wifeLifeExpectancy ?? wifeLE,
     };
+  }
+
+  // Rename wife* → spouse* in all persisted data (working copy + snapshots).
+  renameWifeToSpouse(out);
+  if (Array.isArray(out.scenarios)) {
+    out.scenarios.forEach((sc) => { if (sc && sc.data) renameWifeToSpouse(sc.data); });
   }
 
   // Strip orphaned fields left over from old versions so they don't linger in
@@ -382,6 +387,32 @@ function migrateData(saved) {
   }
 
   return out;
+}
+
+// Rename wife* field keys to spouse* for all persisted data structures.
+// Safe to run multiple times (idempotent — no-ops when already renamed).
+function renameWifeToSpouse(d) {
+  if (!d || typeof d !== 'object') return;
+  const mv = (obj, oldKey, newKey) => {
+    if (obj && oldKey in obj) { obj[newKey] = obj[oldKey]; delete obj[oldKey]; }
+  };
+  mv(d.personal, 'wifeDOB', 'spouseDOB');
+  if (d.income) {
+    mv(d.income, 'wifeIncome', 'spouseIncome');
+    mv(d.income, 'wifeTaxRate', 'spouseTaxRate');
+    mv(d.income, 'wifeRetirementAge', 'spouseRetirementAge');
+    mv(d.income, 'wifeRetireWithMe', 'spouseRetireWithMe');
+  }
+  if (d.ss) {
+    mv(d.ss, 'wifeSSAmount', 'spouseSSAmount');
+    mv(d.ss, 'wifeSSAge', 'spouseSSAge');
+  }
+  if (d.survivor) {
+    mv(d.survivor, 'wifeLifeExpectancy', 'spouseLifeExpectancy');
+    if (d.survivor.whoFirst === 'wife') d.survivor.whoFirst = 'spouse';
+  }
+  (d.loans || []).forEach((l) => { if (l.person === 'wife') l.person = 'spouse'; });
+  (d.vehicles || []).forEach((v) => { if (v.person === 'wife') v.person = 'spouse'; });
 }
 
 // Fields removed in past refactors that may still sit in old saved/imported

@@ -188,13 +188,13 @@ function effectiveWithdrawalRate(account, isInJapan, japanRate) {
 // reuse this engine. `options.randomize` switches to Monte Carlo mode.
 export function simulate(inputs, overrides = {}, options = {}) {
   const myCurrentAge = ageFromDOB(inputs.personal.myDOB);
-  const wifeCurrentAge = ageFromDOB(inputs.personal.wifeDOB);
+  const spouseCurrentAge = ageFromDOB(inputs.personal.spouseDOB);
   const lifeExpectancy = Number(inputs.personal.lifeExpectancy) || 90;
   // Wife's life expectancy lives INSIDE the survivor scenario and is only
   // used when whoFirst === 'me' (wife outlives me). Otherwise the sim ends
   // at my life expectancy — we assume both spouses reach it together.
-  const wifeLifeExpectancy =
-    Number(inputs.survivor?.wifeLifeExpectancy) || lifeExpectancy + 2;
+  const spouseLifeExpectancy =
+    Number(inputs.survivor?.spouseLifeExpectancy) || lifeExpectancy + 2;
   const inflation = (Number(inputs.personal.inflationRate) || 0) / 100;
   const emergencyFund = Number(inputs.personal.emergencyFund) || 0;
 
@@ -207,14 +207,14 @@ export function simulate(inputs, overrides = {}, options = {}) {
   const bankInvestRate = (Number(bankInvest.returnRate) || 0) / 100;
 
   const myRetireAge = overrides.myRetirementAge ?? Number(inputs.income.myRetirementAge);
-  let wifeRetireAge = overrides.wifeRetirementAge ?? Number(inputs.income.wifeRetirementAge);
+  let spouseRetireAge = overrides.spouseRetirementAge ?? Number(inputs.income.spouseRetirementAge);
   // Option: spouse retires at the SAME TIME as me rather than at their own
   // fixed age. "Same time" = the spouse's age in the year I reach my
   // retirement age, derived from the age gap between us. This tracks any
   // change to my retirement age automatically (incl. the possible-retirement
   // search, which passes overrides.myRetirementAge above).
-  if (inputs.income?.wifeRetireWithMe && wifeCurrentAge > 0) {
-    wifeRetireAge = myRetireAge - (myCurrentAge - wifeCurrentAge);
+  if (inputs.income?.spouseRetireWithMe && spouseCurrentAge > 0) {
+    spouseRetireAge = myRetireAge - (myCurrentAge - spouseCurrentAge);
   }
 
   // Income (salary) growth is separate from price inflation. Default 3% =
@@ -308,8 +308,8 @@ export function simulate(inputs, overrides = {}, options = {}) {
   // Social security FRA-67 monthly benefits
   const mySSAge = Number(inputs.ss.mySSAge) || 0;
   const mySSMonthly = Number(inputs.ss.mySSAmount) || 0;
-  const wifeSSAge = Number(inputs.ss.wifeSSAge) || 0;
-  const wifeSSMonthly = Number(inputs.ss.wifeSSAmount) || 0;
+  const spouseSSAge = Number(inputs.ss.spouseSSAge) || 0;
+  const spouseSSMonthly = Number(inputs.ss.spouseSSAmount) || 0;
 
   // Output accumulators
   const yearly = [];
@@ -329,16 +329,16 @@ export function simulate(inputs, overrides = {}, options = {}) {
   const baseYear = new Date().getFullYear();
   // Effective simulation length:
   //   - If survivor scenario = "me first": run until WIFE reaches her life
-  //     expectancy. Year offset = wifeLifeExp - wifeCurrentAge.
+  //     expectancy. Year offset = wifeLifeExp - spouseCurrentAge.
   //   - Otherwise: run until MY life expectancy.
   // We pick the LARGER so the result covers the longest-living spouse.
   const myYears = Math.max(0, lifeExpectancy - myCurrentAge + 1);
-  const wifeYears = wifeCurrentAge > 0
-    ? Math.max(0, wifeLifeExpectancy - wifeCurrentAge + 1)
+  const spouseYears = spouseCurrentAge > 0
+    ? Math.max(0, spouseLifeExpectancy - spouseCurrentAge + 1)
     : 0;
   const survivorMeFirst = survivor.enabled && survivor.whoFirst === 'me';
-  const totalYears = survivorMeFirst && wifeYears > 0
-    ? wifeYears
+  const totalYears = survivorMeFirst && spouseYears > 0
+    ? spouseYears
     : myYears;
 
   // Helper: apply growth, possibly randomized for Monte Carlo runs.
@@ -359,7 +359,7 @@ export function simulate(inputs, overrides = {}, options = {}) {
   // ── Year-by-year loop ──────────────────────────────────────────────────
   for (let yo = 0; yo < totalYears; yo++) {
     const myAge = myCurrentAge + yo;
-    const wifeAge = wifeCurrentAge + yo;
+    const spouseAge = spouseCurrentAge + yo;
     const calYear = baseYear + yo;
     const infl = Math.pow(1 + inflation, yo);
 
@@ -475,8 +475,8 @@ export function simulate(inputs, overrides = {}, options = {}) {
     // Survivor handling: which spouse passes is configurable. Deceased
     // spouse's income/SS stops; surviving spouse keeps the LARGER of the
     // two SS checks (SSA survivor benefit rule).
-    const whoFirst = survivor.whoFirst || 'wife';
-    const isWifeDeceased = isPostSurvivor && whoFirst === 'wife';
+    const whoFirst = survivor.whoFirst || 'spouse';
+    const isSpouseDeceased = isPostSurvivor && whoFirst === 'spouse';
     const isMeDeceased = isPostSurvivor && whoFirst === 'me';
 
     // Working income grows by `incomeGrowth` per year (NOT necessarily the
@@ -486,22 +486,22 @@ export function simulate(inputs, overrides = {}, options = {}) {
     // spendable take-home. The simulator's cash flow uses take-home.
     const incomeFactor = Math.pow(1 + incomeGrowth, yo);
     const myAfterTaxFactor = 1 - (Number(inputs.income.myTaxRate) || 0) / 100;
-    const wifeAfterTaxFactor = 1 - (Number(inputs.income.wifeTaxRate) || 0) / 100;
+    const spouseAfterTaxFactor = 1 - (Number(inputs.income.spouseTaxRate) || 0) / 100;
     const myIncome = isMeDeceased
       ? 0
       : (myAge < myRetireAge ? (Number(inputs.income.myIncome) || 0) * 12 * incomeFactor * myAfterTaxFactor : 0);
-    const wifeIncome = isWifeDeceased
+    const spouseIncome = isSpouseDeceased
       ? 0
-      : (wifeAge < wifeRetireAge ? (Number(inputs.income.wifeIncome) || 0) * 12 * incomeFactor * wifeAfterTaxFactor : 0);
+      : (spouseAge < spouseRetireAge ? (Number(inputs.income.spouseIncome) || 0) * 12 * incomeFactor * spouseAfterTaxFactor : 0);
 
     // Each spouse's OWN benefit (with their own claim-age adjustment).
     const myOwn =
       !isMeDeceased && myAge >= mySSAge && mySSAge > 0
         ? mySSMonthly * ssFactor(mySSAge) * 12 * infl
         : 0;
-    const wifeOwn =
-      !isWifeDeceased && wifeAge >= wifeSSAge && wifeSSAge > 0
-        ? wifeSSMonthly * ssFactor(wifeSSAge) * 12 * infl
+    const spouseOwn =
+      !isSpouseDeceased && spouseAge >= spouseSSAge && spouseSSAge > 0
+        ? spouseSSMonthly * ssFactor(spouseSSAge) * 12 * infl
         : 0;
 
     // SPOUSAL BENEFIT RULE (only applies while both alive AND both filed):
@@ -509,7 +509,7 @@ export function simulate(inputs, overrides = {}, options = {}) {
     // (the excess) to bring their total up to 50% of the OTHER spouse's benefit.
     // Three rules captured here:
     //   1. Anchored to FRA: the 50% target uses the worker's FRA amount
-    //      (mySSMonthly / wifeSSMonthly are the FRA-67 inputs). Delaying the
+    //      (mySSMonthly / spouseSSMonthly are the FRA-67 inputs). Delaying the
     //      worker's own claim past FRA does NOT raise the spousal maximum.
     //   2. Early-claim penalty: the excess is reduced if the RECEIVING spouse
     //      claims before their own FRA (~0.65× at 62 → ~32.5% of worker FRA).
@@ -517,21 +517,21 @@ export function simulate(inputs, overrides = {}, options = {}) {
     //      receiving spouse has filed their own) — enforced by `bothFiled`.
     // The excess is computed on PIAs (FRA amounts): 0.5×worker − own, floored
     // at 0, then reduced for early claiming and added on top of the own check.
-    const bothAlive = !isMeDeceased && !isWifeDeceased;
+    const bothAlive = !isMeDeceased && !isSpouseDeceased;
     const bothFiled =
       bothAlive &&
       myAge >= mySSAge && mySSAge > 0 &&
-      wifeAge >= wifeSSAge && wifeSSAge > 0;
-    const wifeSpousalExcess = bothFiled
-      ? Math.max(0, 0.50 * mySSMonthly - wifeSSMonthly) * spousalExcessFactor(wifeSSAge) * 12 * infl
+      spouseAge >= spouseSSAge && spouseSSAge > 0;
+    const spouseSpousalExcess = bothFiled
+      ? Math.max(0, 0.50 * mySSMonthly - spouseSSMonthly) * spousalExcessFactor(spouseSSAge) * 12 * infl
       : 0;
     const mySpousalExcess = bothFiled
-      ? Math.max(0, 0.50 * wifeSSMonthly - mySSMonthly) * spousalExcessFactor(mySSAge) * 12 * infl
+      ? Math.max(0, 0.50 * spouseSSMonthly - mySSMonthly) * spousalExcessFactor(mySSAge) * 12 * infl
       : 0;
 
     // Total = own (reduced for own claim age) + spousal top-off excess.
     let mySS = myOwn + mySpousalExcess;
-    let wifeSS = wifeOwn + wifeSpousalExcess;
+    let spouseSS = spouseOwn + spouseSpousalExcess;
 
     // SURVIVOR BENEFIT: surviving spouse keeps the LARGER of the two own
     // benefits (the spousal rule no longer applies once one spouse is gone).
@@ -540,14 +540,14 @@ export function simulate(inputs, overrides = {}, options = {}) {
       // we can determine the larger of the two for inheritance purposes.
       const myOwnIfAlive = myAge >= mySSAge && mySSAge > 0
         ? mySSMonthly * ssFactor(mySSAge) * 12 * infl : 0;
-      const wifeOwnIfAlive = wifeAge >= wifeSSAge && wifeSSAge > 0
-        ? wifeSSMonthly * ssFactor(wifeSSAge) * 12 * infl : 0;
-      const inheritedBenefit = Math.max(myOwnIfAlive, wifeOwnIfAlive);
-      if (isWifeDeceased) {
+      const spouseOwnIfAlive = spouseAge >= spouseSSAge && spouseSSAge > 0
+        ? spouseSSMonthly * ssFactor(spouseSSAge) * 12 * infl : 0;
+      const inheritedBenefit = Math.max(myOwnIfAlive, spouseOwnIfAlive);
+      if (isSpouseDeceased) {
         mySS = inheritedBenefit;
-        wifeSS = 0;
+        spouseSS = 0;
       } else if (isMeDeceased) {
-        wifeSS = inheritedBenefit;
+        spouseSS = inheritedBenefit;
         mySS = 0;
       }
     }
@@ -668,7 +668,7 @@ export function simulate(inputs, overrides = {}, options = {}) {
     const vehicleTotalThisYear = vehicleDownThisYear + vehicleAnnualPayment;
 
     const totalIncome =
-      myIncome + wifeIncome + mySS + wifeSS +
+      myIncome + spouseIncome + mySS + spouseSS +
       bracketIncomeAnnual + oneTimeIncomeTotal + rentalIncomeAnnual +
       investIncome;
 
@@ -1014,11 +1014,11 @@ export function simulate(inputs, overrides = {}, options = {}) {
     yearly.push({
       year: calYear,
       myAge,
-      wifeAge,
+      spouseAge,
       myIncome,
-      wifeIncome,
+      spouseIncome,
       mySS,
-      wifeSS,
+      spouseSS,
       bracketIncome: bracketIncomeAnnual,
       oneTimeIncome: oneTimeIncomeTotal,
       oneTimeIncomesThisYear,
@@ -1086,9 +1086,9 @@ export function simulate(inputs, overrides = {}, options = {}) {
       cumulativeNetWorth,
       // Highlight flags
       flagRetireMe: myAge === myRetireAge,
-      flagRetireWife: wifeAge === wifeRetireAge,
+      flagRetireSpouse: spouseAge === spouseRetireAge,
       flagSSStartMe: mySSAge > 0 && myAge === mySSAge,
-      flagSSStartWife: wifeSSAge > 0 && wifeAge === wifeSSAge,
+      flagSSStartSpouse: spouseSSAge > 0 && spouseAge === spouseSSAge,
       flagHouseSold: houseSoldThisYear,
       flagULCancelled: ulCancelledThisYear,
       flagJapanMove,
@@ -1197,10 +1197,10 @@ export function generateRecommendations(inputs, lang = 'en') {
   }
 
   // ── Lever 3: Delay Social Security to 70 ───────────────────────────────
-  if (Number(inputs.ss.mySSAge) < 70 || Number(inputs.ss.wifeSSAge) < 70) {
+  if (Number(inputs.ss.mySSAge) < 70 || Number(inputs.ss.spouseSSAge) < 70) {
     const adj = deepClone(inputs);
     adj.ss.mySSAge = 70;
-    adj.ss.wifeSSAge = 70;
+    adj.ss.spouseSSAge = 70;
     const sim = simulate(adj);
     if (sim.moneyRunOutAge === null) {
       recs.push({
@@ -1407,19 +1407,19 @@ export function generateOptimizations(inputs, lang = 'en') {
   }
 
   // ── 4. Wife's SS claim age ───────────────────────────────────────────
-  const wifeSSAmt = Number(inputs.ss.wifeSSAmount) || 0;
-  if (wifeSSAmt > 0) {
-    const currentWife = Number(inputs.ss.wifeSSAge) || 67;
+  const spouseSSAmt = Number(inputs.ss.spouseSSAmount) || 0;
+  if (spouseSSAmt > 0) {
+    const currentWife = Number(inputs.ss.spouseSSAge) || 67;
     let bestAge = currentWife;
     let bestNW = baselineNW;
     [62, 63, 64, 65, 66, 67, 68, 69, 70].forEach((age) => {
-      const nw = tryWith((adj) => { adj.ss.wifeSSAge = age; });
+      const nw = tryWith((adj) => { adj.ss.spouseSSAge = age; });
       if (nw !== null && nw > bestNW) { bestNW = nw; bestAge = age; }
     });
     if (bestAge !== currentWife && bestNW - baselineNW >= MIN_GAIN) {
       const gain = bestNW - baselineNW;
       opts.push({
-        title: ja ? `配偶者の社会保障（SS）を${bestAge}歳で受給開始` : `Claim wife's Social Security at age ${bestAge}`,
+        title: ja ? `配偶者の社会保障（SS）を${bestAge}歳で受給開始` : `Claim spouse's Social Security at age ${bestAge}`,
         detail: ja
           ? `現在は${currentWife}歳で受給開始の設定です。${bestAge}歳で受給開始すると、世帯の生涯資産が最大化されます。`
           : `Currently set to claim at ${currentWife}. Claiming at ${bestAge} maximizes lifetime household wealth.`,

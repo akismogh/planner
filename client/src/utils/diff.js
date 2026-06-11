@@ -8,7 +8,7 @@
 // Top-level scalar fields get explicit labels for readability.
 const FIELD_LABELS = {
   'personal.myDOB': 'My date of birth',
-  'personal.wifeDOB': "Spouse's date of birth",
+  'personal.spouseDOB': "Spouse's date of birth",
   'personal.lifeExpectancy': 'Life expectancy (age)',
   'personal.inflationRate': 'Inflation rate (%)',
   'personal.emergencyFund': 'Emergency fund',
@@ -16,11 +16,11 @@ const FIELD_LABELS = {
 
   'income.myIncome': 'My monthly income (pre-tax)',
   'income.myTaxRate': 'My effective tax rate (%)',
-  'income.wifeIncome': "Spouse's monthly income (pre-tax)",
-  'income.wifeTaxRate': "Spouse's effective tax rate (%)",
+  'income.spouseIncome': "Spouse's monthly income (pre-tax)",
+  'income.spouseTaxRate': "Spouse's effective tax rate (%)",
   'income.myRetirementAge': 'My retirement age',
-  'income.wifeRetirementAge': "Spouse's retirement age",
-  'income.wifeRetireWithMe': 'Spouse retires when I do',
+  'income.spouseRetirementAge': "Spouse's retirement age",
+  'income.spouseRetireWithMe': 'Spouse retires when I do',
   'income.incomeGrowthRate': 'Annual income growth rate (%)',
 
   'bankInvest.enabled': 'Auto-invest excess cash: enabled',
@@ -45,8 +45,8 @@ const FIELD_LABELS = {
 
   'ss.mySSAmount': 'My SS monthly benefit (at FRA)',
   'ss.mySSAge': 'My SS claim age',
-  'ss.wifeSSAmount': "Spouse's SS monthly benefit (at FRA)",
-  'ss.wifeSSAge': "Spouse's SS claim age",
+  'ss.spouseSSAmount': "Spouse's SS monthly benefit (at FRA)",
+  'ss.spouseSSAge': "Spouse's SS claim age",
 
   'japan.enabled': 'Japan move: enabled',
   'japan.moveAge': 'Japan move: age',
@@ -57,7 +57,7 @@ const FIELD_LABELS = {
   'survivor.whoFirst': 'Survivor scenario: who passes first',
   'survivor.eventAge': 'Survivor scenario: event age',
   'survivor.expenseFactor': 'Survivor scenario: expense factor',
-  'survivor.wifeLifeExpectancy': "Survivor scenario: spouse's life expectancy",
+  'survivor.spouseLifeExpectancy': "Survivor scenario: spouse's life expectancy",
 
   'rental.enabled': 'Rental option: enabled',
   'rental.startAge': 'Rental option: start renting at age',
@@ -132,7 +132,7 @@ const SUBFIELD_LABELS = {
 // ── Japanese label maps (mirror the English ones above) ──
 const FIELD_LABELS_JA = {
   'personal.myDOB': '自分の生年月日',
-  'personal.wifeDOB': '配偶者の生年月日',
+  'personal.spouseDOB': '配偶者の生年月日',
   'personal.lifeExpectancy': '想定寿命（年齢）',
   'personal.inflationRate': 'インフレ率（%）',
   'personal.emergencyFund': '緊急予備資金',
@@ -140,11 +140,11 @@ const FIELD_LABELS_JA = {
 
   'income.myIncome': '自分の月収（税引前）',
   'income.myTaxRate': '自分の実効税率（%）',
-  'income.wifeIncome': '配偶者の月収（税引前）',
-  'income.wifeTaxRate': '配偶者の実効税率（%）',
+  'income.spouseIncome': '配偶者の月収（税引前）',
+  'income.spouseTaxRate': '配偶者の実効税率（%）',
   'income.myRetirementAge': '自分の退職年齢',
-  'income.wifeRetirementAge': '配偶者の退職年齢',
-  'income.wifeRetireWithMe': '配偶者は自分と同時に退職',
+  'income.spouseRetirementAge': '配偶者の退職年齢',
+  'income.spouseRetireWithMe': '配偶者は自分と同時に退職',
   'income.incomeGrowthRate': '年間収入成長率（%）',
 
   'bankInvest.enabled': '余剰資金の自動運用：有効',
@@ -169,8 +169,8 @@ const FIELD_LABELS_JA = {
 
   'ss.mySSAmount': '自分のSS月額給付（FRA時点）',
   'ss.mySSAge': '自分のSS受給開始年齢',
-  'ss.wifeSSAmount': '配偶者のSS月額給付（FRA時点）',
-  'ss.wifeSSAge': '配偶者のSS受給開始年齢',
+  'ss.spouseSSAmount': '配偶者のSS月額給付（FRA時点）',
+  'ss.spouseSSAge': '配偶者のSS受給開始年齢',
 
   'japan.enabled': '日本移住：有効',
   'japan.moveAge': '日本移住：年齢',
@@ -181,7 +181,7 @@ const FIELD_LABELS_JA = {
   'survivor.whoFirst': '遺族シナリオ：先に亡くなるのは',
   'survivor.eventAge': '遺族シナリオ：発生年齢',
   'survivor.expenseFactor': '遺族シナリオ：支出係数',
-  'survivor.wifeLifeExpectancy': '遺族シナリオ：配偶者の想定寿命',
+  'survivor.spouseLifeExpectancy': '遺族シナリオ：配偶者の想定寿命',
 
   'rental.enabled': '賃貸オプション：有効',
   'rental.startAge': '賃貸オプション：賃貸開始年齢',
@@ -253,7 +253,7 @@ const SUBFIELD_LABELS_JA = {
 
 // Known string-enum values, localized for the Before/After columns.
 const VALUE_LABELS_JA = {
-  self: '本人', wife: '配偶者', me: '自分',
+  self: '本人', spouse: '配偶者', me: '自分',
   traditional: 'Traditional', roth: 'Roth',
   car: '車', motorcycle: 'バイク',
 };

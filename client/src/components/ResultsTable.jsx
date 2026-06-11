@@ -23,9 +23,9 @@ import { useUITranslate } from '../i18n.jsx';
 // hides behind anything else (the old row-tinting approach lost info).
 const EVENT_CONFIG = [
   { flag: 'flagRetireMe',      label: 'Retire (me)',   icon: '🎉', cls: 'evt-retire' },
-  { flag: 'flagRetireWife',    label: 'Retire (spouse)', icon: '🎉', cls: 'evt-retire' },
+  { flag: 'flagRetireSpouse',  label: 'Retire (spouse)', icon: '🎉', cls: 'evt-retire' },
   { flag: 'flagSSStartMe',     label: 'SS (me)',       icon: '🏦', cls: 'evt-ss' },
-  { flag: 'flagSSStartWife',   label: 'SS (spouse)',   icon: '🏦', cls: 'evt-ss' },
+  { flag: 'flagSSStartSpouse', label: 'SS (spouse)',   icon: '🏦', cls: 'evt-ss' },
   { flag: 'flagRMDStart',      label: 'RMD start',     icon: '💰', cls: 'evt-rmd' },
   { flag: 'flagULCancelled',   label: 'UL cancelled',  icon: '📃', cls: 'evt-ul' },
   { flag: 'flagRentalStart',   label: 'Rental start',  icon: '🏘️', cls: 'evt-rental' },
@@ -105,9 +105,9 @@ const COLUMNS = [
 
   // ── 3. Income detail ─────────────────────────────────────────────────
   { key: 'myIncome', label: 'My Income', money: true, trackChange: true, group: 'income' },
-  { key: 'wifeIncome', label: "Spouse's Income", money: true, trackChange: true, group: 'income' },
+  { key: 'spouseIncome', label: "Spouse's Income", money: true, trackChange: true, group: 'income' },
   { key: 'mySS', label: 'SS (mine)', money: true, trackChange: true, group: 'income' },
-  { key: 'wifeSS', label: 'SS (spouse)', money: true, trackChange: true, group: 'income' },
+  { key: 'spouseSS', label: 'SS (spouse)', money: true, trackChange: true, group: 'income' },
   { key: 'bracketIncome', label: 'Other Income', money: true, trackChange: true, group: 'income' },
   { key: 'rentalIncome', label: 'Rental Income', money: true, trackChange: true, group: 'income' },
   { key: 'oneTimeIncome', label: 'One-Time Income', money: true, group: 'income' },
@@ -278,8 +278,8 @@ export default function ResultsTable({ rows }) {
                       return (
                         <td key={c.key} className="sticky-col sticky-col-1">
                           <div>{r.myAge} <span className="year-sub">({r.year})</span></div>
-                          {r.wifeAge !== undefined && r.wifeAge !== r.myAge && (
-                            <div className="wife-age-sub">{tr('Spouse')} {r.wifeAge}</div>
+                          {r.spouseAge !== undefined && r.spouseAge !== r.myAge && (
+                            <div className="spouse-age-sub">{tr('Spouse')} {r.spouseAge}</div>
                           )}
                         </td>
                       );

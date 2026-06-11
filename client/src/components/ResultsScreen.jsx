@@ -193,8 +193,8 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
   // Wife's life expectancy is ONLY relevant when survivor scenario is enabled
   // with "I pass first" — otherwise we assume both reach my life exp together.
   const survivorMeFirst = data.survivor?.enabled && data.survivor?.whoFirst === 'me';
-  const wifeLifeExp = survivorMeFirst
-    ? (Number(data.survivor?.wifeLifeExpectancy) || lifeExp + 2)
+  const spouseLifeExp = survivorMeFirst
+    ? (Number(data.survivor?.spouseLifeExpectancy) || lifeExp + 2)
     : null;
   // The simulation actually ends at the last row's myAge — could be later
   // than `lifeExp` if survivor=me-first extended it to wife's life expectancy.
@@ -256,8 +256,8 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
             <SummaryCard
               label={t('res.curAge')}
               value={myCurrentAge ?? '—'}
-              sub={wifeLifeExp
-                ? `${t('res.lifeExpLabel')}: ${t('res.me')} ${lifeExp} · ${t('res.spouseWord')} ${wifeLifeExp} (${t('res.survivorWord')})`
+              sub={spouseLifeExp
+                ? `${t('res.lifeExpLabel')}: ${t('res.me')} ${lifeExp} · ${t('res.spouseWord')} ${spouseLifeExp} (${t('res.survivorWord')})`
                 : `${t('res.lifeExpLabel')}: ${lifeExp}`}
             />
             <SummaryCard
@@ -281,8 +281,8 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
               value={moneyLasts ? t('res.yes') : t('res.no')}
               sub={moneyLasts
                 ? `${t('res.cashCovers')} ${projectionEndAge}${
-                    survivorMeFirst && wifeLifeExp
-                      ? ` (${t('res.wifeWord')} ${wifeLifeExp})`
+                    survivorMeFirst && spouseLifeExp
+                      ? ` (${t('res.wifeWord')} ${spouseLifeExp})`
                       : ''
                   }`
                 : `${t('res.bankRunsOut')} ${result.moneyRunOutAge} ${t('res.wouldNeedTap')}`}
@@ -323,7 +323,7 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
           <div className="endingnw-note">
             <strong>{t('res.howToRead')}</strong> {t('res.moneyLeftExplain')}
             {survivorMeFirst && (
-              <> {t('res.survivorClause')} ({t('res.spouseWord')} {wifeLifeExp} / {t('res.me')} {lifeExp})</>
+              <> {t('res.survivorClause')} ({t('res.spouseWord')} {spouseLifeExp} / {t('res.me')} {lifeExp})</>
             )}
             <ul>
               <li>{t('res.ifPlannedAge')} (<strong>{data.income.myRetirementAge}</strong>),
@@ -548,8 +548,8 @@ function AssetLifelineTable({ rows, retireAge, lifeExp }) {
               <div className="lifeline-age">
                 <span>
                   {t('res.ageWord')} {age}
-                  {r.wifeAge !== undefined && r.wifeAge !== age && (
-                    <span className="lifeline-wife-age"> · {t('res.spouseWord')} {r.wifeAge}</span>
+                  {r.spouseAge !== undefined && r.spouseAge !== age && (
+                    <span className="lifeline-spouse-age"> · {t('res.spouseWord')} {r.spouseAge}</span>
                   )}
                 </span>
                 {isRetire && <span className="tag tag-retire">{t('res.tagRetire')}</span>}
