@@ -51,11 +51,24 @@ export async function saveData(payload) {
 // ── Backup helpers (used by the public build) ─────────────────────────────
 // Export the current data to a JSON file the user downloads to their PC.
 export function exportDataToFile(data) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const json = JSON.stringify(data, null, 2);
+  const filename = `retirement-data-${new Date().toISOString().slice(0, 10)}.json`;
+
+  // Android WebView shell: hand the bytes straight to the native layer.
+  // Blob/`a.download` downloads don't reliably fire inside a WebView, so the
+  // app exposes a `RetirementAndroid.saveFile` bridge that writes to Downloads.
+  if (typeof window !== 'undefined' &&
+      window.RetirementAndroid &&
+      typeof window.RetirementAndroid.saveFile === 'function') {
+    window.RetirementAndroid.saveFile(filename, json);
+    return;
+  }
+
+  const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `retirement-data-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
 }

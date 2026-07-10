@@ -174,9 +174,9 @@ body {
   .summary-card { border-radius: 22px; padding: 18px; }
   .summary-value { font-size: 26px; }
 
-  /* ── Language toggle clears the status bar ──────────────────────────── */
+  /* ── Language toggle sits well clear of the status-bar icons ────────── */
   .lang-toggle {
-    top: calc(env(safe-area-inset-top) + 8px);
+    top: calc(env(safe-area-inset-top) + 22px);
     right: calc(env(safe-area-inset-right) + 12px);
     box-shadow: 0 6px 18px rgba(84, 116, 150, 0.22);
   }

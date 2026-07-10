@@ -12,3 +12,6 @@ local.properties
 # Bundled web assets are generated from client/dist by build-apk.ps1;
 # no need to version the built JS/CSS.
 app/src/main/assets/
+
+# Private seed data (a copy of the user's data.json) — never commit.
+app/src/main/res/raw/seed_data.json

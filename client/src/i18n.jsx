@@ -19,14 +19,14 @@ const STRINGS = {
     ja: 'データは2秒ごとに自動保存され、プロジェクトフォルダの data.json に保存されます。',
   },
   'app.subtitle.browser': {
-    en: '🔒 100% private — your data is stored only in this browser on your device and is never sent to any server.',
-    ja: '🔒 完全プライベート — データはこの端末のブラウザ内のみに保存され、サーバーには一切送信されません。',
+    en: '🔒 Private — your data stays on this device.',
+    ja: '🔒 プライベート — データはこの端末内にのみ保存されます。',
   },
   'toolbar.export':  { en: '⬇️ Export data (backup)',   ja: '⬇️ データを書き出し（バックアップ）' },
   'toolbar.import':  { en: '⬆️ Import data',            ja: '⬆️ データを読み込み' },
   'toolbar.note':    {
-    en: 'Tip: clearing your browser data will erase saved inputs — export regularly.',
-    ja: 'ヒント：ブラウザのデータを消すと保存内容も消えます。定期的に書き出してください。',
+    en: 'Tip: clearing the app’s data will erase saved inputs — export regularly.',
+    ja: 'ヒント：アプリのデータを消すと保存内容も消えます。定期的に書き出してください。',
   },
 
   // Buttons
