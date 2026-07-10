@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
 import { LangProvider } from './i18n.jsx';
 import './App.css';
+import './mobile-theme.css';
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

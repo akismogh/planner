@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --open",
+    "dev:gh": "vite --mode github --host 127.0.0.1 --port 5173",
     "build": "vite build",
     "build:gh": "vite build --mode github",
     "preview": "vite preview"

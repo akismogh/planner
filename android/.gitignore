@@ -1,0 +1,14 @@
+# Gradle / build output
+.gradle/
+build/
+app/build/
+.kotlin/
+*.iml
+.idea/
+
+# Machine-specific SDK path
+local.properties
+
+# Bundled web assets are generated from client/dist by build-apk.ps1;
+# no need to version the built JS/CSS.
+app/src/main/assets/

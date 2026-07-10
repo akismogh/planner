@@ -1,0 +1,235 @@
+/* ============================================================================
+   MOBILE RESKIN  —  "watercolor sky" aesthetic
+   ----------------------------------------------------------------------------
+   Layered on top of App.css (imported after it in main.jsx). Reworks the look
+   toward the soft sky-gradient / rounded-airy-card style of the reference
+   travel-app screens, and tunes the whole thing for phone / WebView use:
+     • safe-area insets (status bar + gesture nav / notch)
+     • no accidental horizontal scroll
+     • bigger touch targets, larger radii, softer diffuse shadows
+     • a friendly full-bleed "sky" hero header
+     • a floating bottom action bar styled like the reference bottom nav
+   The heavier layout changes are scoped to phone/tablet widths so the desktop
+   GitHub Pages experience is preserved.
+   ========================================================================== */
+
+:root {
+  /* Airier, slightly more vivid sky palette pulled from the reference art. */
+  --sky-top:   #a9cfe4;
+  --sky-mid:   #cfe6f0;
+  --cream:     #f6e9cb;
+  --gold:      #f2a63b;
+  --gold-soft: #fdeccb;
+  --ink:       #1b1d24;   /* near-black primary (matches reference black nav) */
+  --ink-hover: #2f323d;
+
+  /* Reskin overrides of the base tokens. */
+  --accent:       #1b1d24;
+  --accent-hover: #2f323d;
+  --amber:        #f2a63b;
+  --amber-soft:   #fdeccb;
+  --card-shadow:  0 14px 34px rgba(84, 116, 150, 0.16);
+}
+
+/* ── Airier full-page sky wash + no sideways scroll ───────────────────────── */
+html {
+  /* Paint the sky behind the notch/status bar so edge-to-edge looks seamless. */
+  background: var(--sky-top);
+}
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;         /* kill accidental horizontal pan/clipping */
+}
+body {
+  background:
+    radial-gradient(120% 60% at 50% -8%, rgba(255, 244, 214, 0.9) 0%, rgba(255, 244, 214, 0) 55%),
+    linear-gradient(180deg, #a9cfe4 0%, #c7e2ef 16%, #eef4f3 46%, #f3ecd9 100%);
+  background-attachment: fixed;
+}
+
+/* ============================================================================
+   PHONE + SMALL TABLET  (≤ 860px)  — the WebView app always lands here.
+   ========================================================================== */
+@media (max-width: 860px) {
+
+  /* ── Layout shells: respect safe areas, leave room for the floating bar ── */
+  .input-form {
+    padding:
+      calc(env(safe-area-inset-top) + 8px)
+      calc(env(safe-area-inset-right) + 16px)
+      calc(env(safe-area-inset-bottom) + 118px)
+      calc(env(safe-area-inset-left) + 16px);
+  }
+  .results-screen {
+    padding:
+      calc(env(safe-area-inset-top) + 8px)
+      calc(env(safe-area-inset-right) + 14px)
+      calc(env(safe-area-inset-bottom) + 104px)
+      calc(env(safe-area-inset-left) + 14px);
+  }
+
+  /* ── Hero header (the app title sitting on the open sky) ──────────────── */
+  .input-form > h1 {
+    margin: 6px 2px 2px;
+    font-size: 30px;
+    line-height: 1.12;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #14202b;
+  }
+  .input-form > h1::after {
+    height: 5px;
+    width: 54px;
+    background: var(--gold);
+    margin-top: 10px;
+  }
+  .input-form > .subtitle {
+    margin: 10px 2px 20px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: #4a5b68;
+  }
+
+  /* ── Cards: rounder, softer, airier ─────────────────────────────────── */
+  details,
+  .scenario-bar,
+  .data-toolbar,
+  .summary-card,
+  .chart-wrapper,
+  .results-table-wrapper,
+  .asset-lifeline,
+  .mc-card,
+  .loaded-summary,
+  .recs-panel,
+  .opts-panel,
+  .comparison-panel {
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: var(--card-shadow);
+    background: rgba(255, 255, 255, 0.96);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+  details { padding: 16px 18px; margin-bottom: 16px; }
+  .scenario-bar { padding: 18px; margin-bottom: 16px; }
+
+  /* Section toggle rows read like tappable list items. */
+  details > summary {
+    font-size: 16px;
+    font-weight: 600;
+    padding: 6px 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  details[open] > summary { margin-bottom: 14px; }
+
+  /* ── Form-group headers: friendly (not shouty uppercase) ─────────────── */
+  .form-group-header {
+    margin: 30px 4px 14px;
+    padding: 0 0 0 14px;
+    font-size: 19px;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: -0.01em;
+    color: #16222d;
+    border-left: 5px solid var(--gold);
+    line-height: 1.2;
+  }
+  .form-group-header:first-of-type { margin-top: 12px; }
+
+  /* Inner sub-cards get a hair more room + rounding. */
+  .card { border-radius: 16px; padding: 13px; }
+
+  /* ── Inputs: comfy touch targets, gold focus ring ───────────────────── */
+  /* Prevent CSS-grid "blowout": date/number inputs carry an intrinsic
+     min-width that otherwise widens the 1fr track past the viewport, which
+     clipped labels/fields on the edges. min-width:0 + full-width fixes it. */
+  .grid-2, .grid-3 { min-width: 0; }
+  .field { gap: 6px; min-width: 0; }
+  .field-label { font-size: 12.5px; overflow-wrap: anywhere; }
+  .field input,
+  .field select {
+    padding: 12px 14px;
+    border-radius: 14px;
+    border-color: #e2e7ee;
+    font-size: 16px;               /* ≥16px stops focus-zoom */
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .field input:focus,
+  .field select:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(242, 166, 59, 0.28);
+  }
+
+  /* ── Scenario cards: airier ─────────────────────────────────────────── */
+  .scenario-cards { gap: 12px; }
+  .scenario-card { border-radius: 18px; min-height: 128px; }
+  .scenario-card.scenario-filled { border-top-width: 4px; border-top-color: var(--gold); }
+
+  /* ── Summary banner: single clean column of stat cards ──────────────── */
+  .summary-banner { gap: 12px; }
+  .summary-card { border-radius: 22px; padding: 18px; }
+  .summary-value { font-size: 26px; }
+
+  /* ── Language toggle clears the status bar ──────────────────────────── */
+  .lang-toggle {
+    top: calc(env(safe-area-inset-top) + 8px);
+    right: calc(env(safe-area-inset-right) + 12px);
+    box-shadow: 0 6px 18px rgba(84, 116, 150, 0.22);
+  }
+  /* Nudge the hero down so the title never collides with the toggle. */
+  .input-form > h1 { padding-right: 84px; }
+
+  /* ── Floating action bar → reference-style bottom nav ───────────────── */
+  .actions,
+  .floating-actions {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    bottom: calc(env(safe-area-inset-bottom) + 12px);
+    width: min(560px, calc(100% - 24px));
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.86);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    backdrop-filter: blur(14px) saturate(1.2);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 16px 40px rgba(43, 58, 82, 0.26);
+  }
+  .btn-save {
+    flex: 0 0 auto;
+    min-width: 96px;
+    padding: 13px 18px;
+    border-radius: 22px;
+    font-size: 14px;
+  }
+  .btn-calculate,
+  .btn-back {
+    flex: 1 1 auto;
+    padding: 14px 22px;
+    border-radius: 22px;
+    font-size: 15px;
+    font-weight: 700;
+    background: var(--ink);
+    box-shadow: 0 8px 20px rgba(27, 29, 36, 0.34);
+  }
+  .btn-calculate:hover,
+  .btn-back:hover { background: var(--ink-hover); }
+
+  /* ── Data toolbar (browser build) ───────────────────────────────────── */
+  .data-toolbar { border-radius: 20px; padding: 14px 16px; gap: 10px; }
+  .btn-data { padding: 11px 16px; border-radius: 16px; }
+
+  /* Bracket / tables keep their existing horizontal-scroll behavior. */
+  .bracket-card { border-radius: 18px; }
+}
+
+/* ── Very small phones: let the title breathe a bit less ─────────────────── */
+@media (max-width: 380px) {
+  .input-form > h1 { font-size: 26px; }
+}
