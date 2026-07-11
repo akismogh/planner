@@ -162,8 +162,29 @@ export default function App() {
     } catch (err) {
       console.error('Snapshot tracking failed:', err);
     }
+    // Push a history entry so the Android back gesture (left-edge swipe) and the
+    // browser Back button return to the input form instead of exiting the app.
+    try { window.history.pushState({ rpView: 'results' }, ''); } catch { /* ignore */ }
     setView('results');
   }, [data]);
+
+  // Back to the input form. If we pushed a results history entry, pop it so
+  // the history stays in sync (popstate handler flips the view); otherwise just
+  // switch directly.
+  const goBack = useCallback(() => {
+    if (window.history.state && window.history.state.rpView === 'results') {
+      window.history.back();
+    } else {
+      setView('input');
+    }
+  }, []);
+
+  // Any history "back" (Android gesture/button, browser Back) returns to inputs.
+  useEffect(() => {
+    const onPop = () => setView('input');
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
 
   // ── Scenario save/load handlers ──────────────────────────────────────────
   // Each scenario is a snapshot of ALL planning inputs (excluding the
@@ -261,12 +282,12 @@ export default function App() {
         onCalculate();
       } else if (e.key === 'ArrowLeft' && view === 'results') {
         e.preventDefault();
-        setView('input');
+        goBack();
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [view, onCalculate]);
+  }, [view, onCalculate, goBack]);
 
   // ── Loading / error states ───────────────────────────────────────────────
   if (loadStatus === 'loading') {
@@ -288,7 +309,7 @@ export default function App() {
         <LanguageToggle />
         <ResultsScreen
           data={data}
-          onBack={() => setView('input')}
+          onBack={goBack}
           previousSnapshot={previousSnapshot}
         />
       </>

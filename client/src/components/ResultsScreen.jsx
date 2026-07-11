@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   simulate,
   findPossibleRetirementAge,
@@ -18,6 +18,27 @@ import ResultsChart from './ResultsChart.jsx';
 export default function ResultsScreen({ data, onBack, previousSnapshot }) {
   const t = useT();
   const { lang } = useLang();
+
+  // Left-edge right-swipe → back to inputs (for devices where the system
+  // back-gesture doesn't own the edge, e.g. 3-button navigation). On gesture
+  // navigation the OS handles the same swipe and Android back returns here too.
+  const edgeTouch = useRef(null);
+  const handleEdgeTouchStart = (e) => {
+    const tch = e.touches[0];
+    edgeTouch.current = tch && tch.clientX <= 28
+      ? { x: tch.clientX, y: tch.clientY }
+      : null;
+  };
+  const handleEdgeTouchEnd = (e) => {
+    const start = edgeTouch.current;
+    edgeTouch.current = null;
+    if (!start) return;
+    const tch = e.changedTouches[0];
+    if (!tch) return;
+    if (tch.clientX - start.x > 60 && Math.abs(tch.clientY - start.y) < 45) {
+      onBack();
+    }
+  };
   const [mcResult, setMcResult] = useState(null);
   const [mcRunning, setMcRunning] = useState(false);
 
@@ -207,7 +228,11 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
   const mcEnabled = data.monteCarlo?.enabled;
 
   return (
-    <div className="results-screen">
+    <div
+      className="results-screen"
+      onTouchStart={handleEdgeTouchStart}
+      onTouchEnd={handleEdgeTouchEnd}
+    >
       <div className="results-header">
         <h1>{t('res.title')}</h1>
       </div>

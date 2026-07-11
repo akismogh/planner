@@ -1,10 +1,21 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ReferenceLine, ResponsiveContainer,
 } from 'recharts';
 import { fmtMoney } from '../utils/format.js';
 import { useUITranslate } from '../i18n.jsx';
+
+// Compact axis labels ($1.8M / $600k) so the Y-axis is narrow and the plot
+// gets as much width as possible.
+function fmtAxisMoney(n) {
+  if (n === null || n === undefined || isNaN(n)) return '';
+  const sign = n < 0 ? '-' : '';
+  const a = Math.abs(n);
+  if (a >= 1e6) return `${sign}$${(a / 1e6).toFixed(1).replace(/\.0$/, '')}M`;
+  if (a >= 1e3) return `${sign}$${Math.round(a / 1e3)}k`;
+  return `${sign}$${Math.round(a)}`;
+}
 
 // Lines: total assets, expenses, income, net worth.
 // Vertical reference lines mark key life events.
@@ -121,15 +132,32 @@ function ChartTooltip({ active, payload, label }) {
 
 export default function ResultsChart({ rows, markers }) {
   const tr = useUITranslate();
+  const [rotated, setRotated] = useState(false);
+  const [vp, setVp] = useState({ w: 0, h: 0 });
+
+  // While rotated, size the (pre-rotation) container to the swapped viewport
+  // dimensions in JS — vh/vw units are unreliable inside a WebView — and lock
+  // page scrolling so only the graph shows.
+  useEffect(() => {
+    if (!rotated) return undefined;
+    const update = () => setVp({ w: window.innerWidth, h: window.innerHeight });
+    update();
+    window.addEventListener('resize', update);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('resize', update);
+      document.body.style.overflow = '';
+    };
+  }, [rotated]);
+
   if (!rows || rows.length === 0) return null;
 
-  return (
-    <div className="chart-wrapper">
-      <ResponsiveContainer width="100%" height={420}>
-        <LineChart data={rows} margin={{ top: 30, right: 30, left: 60, bottom: 10 }}>
+  const chart = (
+    <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={rows} margin={{ top: 24, right: 14, left: 2, bottom: 6 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="myAge" label={{ value: tr('My Age'), position: 'insideBottom', offset: -5 }} />
-          <YAxis tickFormatter={fmtMoney} />
+          <YAxis width={46} tickFormatter={fmtAxisMoney} />
           <Tooltip content={<ChartTooltip />} />
           <Legend />
           {/* Total Assets = liquid accounts + home equity (the figure formerly
@@ -145,7 +173,7 @@ export default function ResultsChart({ rows, markers }) {
               number. Going below 0 also triggers Money Lasts: No. */}
           <Line type="monotone" dataKey="cumulativeNetCashFlow" name={tr('Cash Position (yr)')} stroke="#f59e0b" dot={false} strokeWidth={2} strokeDasharray="4 2" />
           {/* Zero line — dipping below = bank can't cover this year. */}
-          <ReferenceLine y={0} stroke="#ef4444" strokeDasharray="2 4" label={{ value: tr('$0 cash'), position: 'left', fill: '#ef4444', fontSize: 11, fontWeight: 600 }} />
+          <ReferenceLine y={0} stroke="#ef4444" strokeDasharray="2 4" label={{ value: tr('$0 cash'), position: 'insideTopLeft', fill: '#ef4444', fontSize: 11, fontWeight: 600 }} />
           {markers.retireAge && (
             <ReferenceLine x={markers.retireAge} stroke="#d04a3a" strokeDasharray="4 4"
               label={{ value: tr('Retire'), position: 'top', fill: '#d04a3a', fontSize: 11 }} />
@@ -176,6 +204,43 @@ export default function ResultsChart({ rows, markers }) {
           )}
         </LineChart>
       </ResponsiveContainer>
+  );
+
+  // Rotated fullscreen view: the chart alone turned 90° so it fills the screen
+  // in landscape while the phone stays in portrait. Dismiss with the ✕ button.
+  if (rotated) {
+    return (
+      <div className="chart-rotate-overlay" role="dialog" aria-label={tr('Retirement Projection')}>
+        <button
+          className="chart-rotate-close"
+          onClick={() => setRotated(false)}
+          aria-label={tr('Close')}
+        >✕</button>
+        <div
+          className="chart-rotate-inner"
+          style={{ width: `${vp.h}px`, height: `${vp.w}px` }}
+        >{chart}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="chart-wrapper">
+      <button
+        className="chart-rotate-btn"
+        onClick={() => setRotated(true)}
+        title={tr('Rotate graph')}
+        aria-label={tr('Rotate graph')}
+      >
+        {/* rotate-device glyph */}
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none"
+             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="7" width="12" height="14" rx="2" />
+          <path d="M15 4a5 5 0 0 1 5 5" />
+          <path d="M20 4v3h-3" />
+        </svg>
+      </button>
+      <div className="chart-canvas">{chart}</div>
     </div>
   );
 }

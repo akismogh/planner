@@ -2044,7 +2044,7 @@ function BracketEditor({ index, bracket, setBracket, data, japan, onDuplicate, o
   return (
     <details className="card bracket-card">
       <summary className="bracket-summary">
-        <span className="bracket-summary-label">{rangeLabel}</span>
+        <span className="bracket-summary-label">📅 {rangeLabel}</span>
         <span className="bracket-summary-total" title={tr('TOTAL monthly cost')}>
           {fmt$(totalMonthly)}<span className="bracket-summary-permo">/{tr('mo')}</span>
         </span>

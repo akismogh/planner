@@ -22,7 +22,9 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.webkit.WebViewAssetLoader
 import java.io.File
 
@@ -43,6 +45,11 @@ import java.io.File
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
+
+    // Real status-bar height (CSS px) — injected into the page as
+    // --android-sbar-top so CSS can clear the clock/battery in landscape, where
+    // the display-cutout safe-area inset is ~0.
+    private var statusBarTopCssPx = 0
 
     // ── Import: file chooser callback + launcher ─────────────────────────────
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
@@ -87,6 +94,15 @@ class MainActivity : AppCompatActivity() {
         // directly (blob/<a download> downloads don't reliably fire in a WebView).
         webView.addJavascriptInterface(WebBridge(), "RetirementAndroid")
 
+        // Track the status-bar height and hand it to the page (updates on
+        // rotation) so CSS can push the language toggle clear of the clock.
+        ViewCompat.setOnApplyWindowInsetsListener(webView) { _, insets ->
+            val top = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            statusBarTopCssPx = (top / resources.displayMetrics.density).toInt()
+            injectStatusBarInset()
+            insets
+        }
+
         webView.webViewClient = object : WebViewClient() {
             override fun shouldInterceptRequest(
                 view: WebView, request: WebResourceRequest
@@ -100,6 +116,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
+                injectStatusBarInset()
                 maybeSeedData()
             }
         }
@@ -158,6 +175,16 @@ class MainActivity : AppCompatActivity() {
             }catch(e){console.error(e);}})();
         """.trimIndent()
         webView.evaluateJavascript(js, null)
+    }
+
+    // Publish the status-bar height to the page as a CSS variable.
+    private fun injectStatusBarInset() {
+        if (!::webView.isInitialized) return
+        webView.evaluateJavascript(
+            "document.documentElement.style.setProperty(" +
+                "'--android-sbar-top', '${statusBarTopCssPx}px');",
+            null
+        )
     }
 
     // ── Export bridge ────────────────────────────────────────────────────────
