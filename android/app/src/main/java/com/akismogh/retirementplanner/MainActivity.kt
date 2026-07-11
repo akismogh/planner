@@ -46,10 +46,12 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
 
-    // Real status-bar height (CSS px) — injected into the page as
-    // --android-sbar-top so CSS can clear the clock/battery in landscape, where
-    // the display-cutout safe-area inset is ~0.
+    // Real system-bar sizes (CSS px) — injected into the page as
+    // --android-sbar-top / --android-nav-bottom so CSS can clear the clock /
+    // battery and the gesture-nav bar. env(safe-area-inset-*) reads ~0 in this
+    // WebView, so these injected values are what the layout actually relies on.
     private var statusBarTopCssPx = 0
+    private var navBarBottomCssPx = 0
 
     // ── Import: file chooser callback + launcher ─────────────────────────────
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
@@ -97,8 +99,10 @@ class MainActivity : AppCompatActivity() {
         // Track the status-bar height and hand it to the page (updates on
         // rotation) so CSS can push the language toggle clear of the clock.
         ViewCompat.setOnApplyWindowInsetsListener(webView) { _, insets ->
-            val top = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
-            statusBarTopCssPx = (top / resources.displayMetrics.density).toInt()
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val density = resources.displayMetrics.density
+            statusBarTopCssPx = (bars.top / density).toInt()
+            navBarBottomCssPx = (bars.bottom / density).toInt()
             injectStatusBarInset()
             insets
         }
@@ -177,12 +181,12 @@ class MainActivity : AppCompatActivity() {
         webView.evaluateJavascript(js, null)
     }
 
-    // Publish the status-bar height to the page as a CSS variable.
+    // Publish the system-bar sizes to the page as CSS variables.
     private fun injectStatusBarInset() {
         if (!::webView.isInitialized) return
         webView.evaluateJavascript(
-            "document.documentElement.style.setProperty(" +
-                "'--android-sbar-top', '${statusBarTopCssPx}px');",
+            "document.documentElement.style.setProperty('--android-sbar-top', '${statusBarTopCssPx}px');" +
+                "document.documentElement.style.setProperty('--android-nav-bottom', '${navBarBottomCssPx}px');",
             null
         )
     }

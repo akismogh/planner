@@ -13,7 +13,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 
 const STRINGS = {
   // App chrome
-  'app.title':       { en: 'Retirement Planner',        ja: 'リタイアメント・プランナー' },
+  'app.title':       { en: 'Retirement Planner',        ja: 'リタイアメント計画' },
   'app.subtitle.local': {
     en: 'Data is auto-saved every 2 seconds and stored in data.json in your project folder.',
     ja: 'データは2秒ごとに自動保存され、プロジェクトフォルダの data.json に保存されます。',

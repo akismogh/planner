@@ -52,27 +52,32 @@ body {
    ========================================================================== */
 @media (max-width: 860px) {
 
-  /* ── Layout shells: respect safe areas, leave room for the floating bar ── */
+  /* ── Layout shells: respect safe areas, leave room for the floating bar ──
+     Top padding uses the injected --android-sbar-top too: env(safe-area-inset-
+     top) reads ~0 inside this WebView, so on its own the title slid under the
+     status-bar clock/battery. */
   .input-form {
     padding:
-      calc(env(safe-area-inset-top) + 8px)
+      calc(max(env(safe-area-inset-top), var(--android-sbar-top, 0px)) + 10px)
       calc(env(safe-area-inset-right) + 16px)
       calc(env(safe-area-inset-bottom) + 118px)
       calc(env(safe-area-inset-left) + 16px);
   }
   .results-screen {
     padding:
-      calc(env(safe-area-inset-top) + 8px)
+      calc(max(env(safe-area-inset-top), var(--android-sbar-top, 0px)) + 10px)
       calc(env(safe-area-inset-right) + 14px)
       calc(env(safe-area-inset-bottom) + 104px)
       calc(env(safe-area-inset-left) + 14px);
   }
 
-  /* ── Hero header (the app title sitting on the open sky) ──────────────── */
-  .input-form > h1 {
+  /* ── Titles: same compact size on input ("Retirement Planner") and results
+        ("Retirement Projection") so they match. ── */
+  .input-form > h1,
+  .results-header h1 {
     margin: 6px 2px 2px;
-    font-size: 30px;
-    line-height: 1.12;
+    font-size: 24px;
+    line-height: 1.15;
     font-weight: 700;
     letter-spacing: -0.01em;
     color: #14202b;
@@ -231,7 +236,8 @@ body {
 
 /* ── Very small phones: let the title breathe a bit less ─────────────────── */
 @media (max-width: 380px) {
-  .input-form > h1 { font-size: 26px; }
+  .input-form > h1,
+  .results-header h1 { font-size: 22px; }
 }
 
 /* ============================================================================
@@ -260,11 +266,13 @@ body {
   .chart-canvas { height: 340px; }
 }
 
-/* Rotate-to-landscape button (top-right of the chart card). */
+/* Rotate-to-landscape button — top-RIGHT corner of the chart card. The chart
+   card sits below the title, so this stays clear of (below) the fixed EN/JP
+   language toggle in the top-right of the screen. */
 .chart-rotate-btn {
   position: absolute;
   top: 10px;
-  right: 12px;
+  right: 10px;
   z-index: 5;
   display: inline-flex;
   align-items: center;
@@ -280,13 +288,14 @@ body {
 }
 .chart-rotate-btn:hover { background: #f4f7fa; }
 
-/* Fullscreen rotated overlay: the graph turned 90° to fill a portrait screen. */
+/* Fullscreen rotated overlay: the graph turned 90° to fill a portrait screen,
+   on a clean white background. */
 .chart-rotate-overlay {
   position: fixed;
   inset: 0;
   z-index: 3000;
   overflow: hidden;
-  background: linear-gradient(180deg, #a9cfe4 0%, #cfe6f0 30%, #eef4f3 100%);
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -294,24 +303,39 @@ body {
 .chart-rotate-inner {
   /* width/height are set inline (swapped viewport dims) from JS. flex:none so
      the (deliberately oversized) box isn't shrunk to fit the overlay before
-     it's rotated. */
+     it's rotated.
+     After rotate(90°) the PRE-rotation LEFT edge maps to the SCREEN TOP, and
+     that's where the money (Y-axis) numbers land — so pad the left generously
+     with the status-bar height to keep those numbers clear of the clock/
+     battery. */
   flex: 0 0 auto;
   transform: rotate(90deg);
   transform-origin: center center;
-  padding: 8px 12px;
+  padding:
+    10px
+    10px
+    10px
+    calc(max(env(safe-area-inset-top), var(--android-sbar-top, 0px)) + 12px);
 }
 .chart-rotate-close {
   position: fixed;
-  top: calc(max(env(safe-area-inset-top), var(--android-sbar-top, 0px)) + 10px);
-  right: calc(env(safe-area-inset-right) + 14px);
+  /* Small close button in the BOTTOM-RIGHT of the screen, with equal spacing
+     from the right edge and from the top of the gesture-nav bar. */
+  bottom: calc(max(env(safe-area-inset-bottom), var(--android-nav-bottom, 0px)) + 14px);
+  right: 14px;
   z-index: 3001;
-  width: 44px;
-  height: 44px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  /* Centre the ✕ glyph exactly in the circle. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   border: none;
-  background: rgba(27, 29, 36, 0.9);
+  background: rgba(27, 29, 36, 0.92);
   color: #fff;
-  font-size: 18px;
+  font-size: 15px;
   line-height: 1;
   box-shadow: 0 6px 18px rgba(43, 58, 82, 0.3);
 }
