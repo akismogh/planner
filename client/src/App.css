@@ -1199,6 +1199,67 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 .opts-panel.opts-already-optimal h3 { color: #075985; }
 .opts-panel.opts-already-optimal .opts-note { color: #0c4a6e; }
+
+/* ── AI Insights panel (opt-in Claude suggestions) ─────────────────────── */
+.ai-panel {
+  background: #faf5ff;
+  border: 2px solid #a855f7;
+  border-radius: 18px;
+  padding: 18px 20px;
+  margin-bottom: 18px;
+}
+.ai-panel h3 {
+  margin: 0 0 6px;
+  color: #6b21a8;
+  font-size: 18px;
+}
+.ai-note {
+  margin: 0 0 14px;
+  font-size: 12.5px;
+  color: #581c87;
+  line-height: 1.5;
+}
+.btn-ai {
+  background: #7c3aed;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-ai:hover { background: #6d28d9; }
+.btn-ai:disabled { opacity: 0.6; cursor: default; }
+.btn-ai-secondary {
+  background: white;
+  color: #6d28d9;
+  border: 1.5px solid #a855f7;
+  margin-top: 12px;
+}
+.btn-ai-secondary:hover { background: #f5f3ff; }
+.ai-response {
+  background: white;
+  border: 1px solid #e9d5ff;
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: #1b1d24;
+  white-space: pre-wrap;
+}
+.ai-error {
+  color: #991b1b;
+  font-size: 13px;
+  margin-top: 4px;
+}
+.ai-disclaimer {
+  margin: 10px 0 0;
+  font-size: 11.5px;
+  color: #7e22ce;
+  font-style: italic;
+}
 .opt-card {
   background: white;
   border: 1px solid var(--border);

@@ -14,6 +14,7 @@ import { generateInsights, summarizeImpact, withPathSetTo } from '../utils/insig
 import { useT, useLang } from '../i18n.jsx';
 import ResultsTable from './ResultsTable.jsx';
 import ResultsChart from './ResultsChart.jsx';
+import AiInsightsPanel from './AiInsightsPanel.jsx';
 
 export default function ResultsScreen({ data, onBack, previousSnapshot }) {
   const t = useT();
@@ -411,6 +412,29 @@ export default function ResultsScreen({ data, onBack, previousSnapshot }) {
               </p>
             </div>
           )}
+
+          {/* ── AI Insights (opt-in; sends only the anonymized summary below) ── */}
+          <AiInsightsPanel
+            summary={{
+              currentAge: myCurrentAge,
+              lifeExpectancy: lifeExp,
+              plannedRetirementAge: Number(data.income.myRetirementAge) || null,
+              earliestPossibleRetirementAge: result.possibleAge,
+              moneyLasts,
+              moneyRunsOutAtAge: result.moneyRunOutAge,
+              netWorthAtRetirement: result.netWorthAtRetirement,
+              endingNetWorthAtPlannedRetirement: result.endingNetWorthPlanned,
+              endingNetWorthAtEarliestRetirement: result.endingNetWorthAtPossible,
+              bankBalanceToday: result.bankCurrent,
+              bankBalanceAtRetirement: result.bankAtRetirement,
+              monthlyGrossIncomeMe: Number(data.income.myIncome) || 0,
+              monthlyGrossIncomeSpouse: Number(data.income.spouseIncome) || 0,
+              incomeGrowthRatePct: Number(data.income.incomeGrowthRate) || 0,
+              inflationRatePct: Number(data.personal.inflationRate) || 0,
+              survivorScenarioEnabled: !!survivorEnabled,
+              japanRelocationEnabled: !!japanEnabled,
+            }}
+          />
 
           {/* ── Scenario flags ── */}
           {(japanEnabled || survivorEnabled) && (

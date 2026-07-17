@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- INTERNET is only used to fetch the Google Fonts CSS; the app itself
-         (calculations, storage) works fully offline from bundled assets. -->
+    <!-- INTERNET is used to fetch the Google Fonts CSS, and — only when the
+         user taps "Get AI suggestions" on the results screen — to call the
+         AI Insights relay worker (see /worker). The app itself (calculations,
+         storage) works fully offline from bundled assets otherwise. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application

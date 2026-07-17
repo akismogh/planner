@@ -67,6 +67,21 @@ const STRINGS = {
   // Results screen chrome
   'res.title':       { en: 'Retirement Projection',       ja: 'リタイアメント予測' },
   'res.whatChanged': { en: '🔍 What Changed Since Your Last Calculation', ja: '🔍 前回の計算からの変更点' },
+
+  // AI Insights panel
+  'ai.title':        { en: '✨ AI Insights', ja: '✨ AIによる提案' },
+  'ai.privacyNote': {
+    en: 'Sends only anonymized numbers (ages, savings, projected balances — no names or account details) to Claude AI for a second opinion.',
+    ja: '匿名化された数字（年齢・貯蓄額・予測残高のみ。氏名や口座情報は含みません）だけをClaude AIに送り、提案を受け取ります。',
+  },
+  'ai.ask':          { en: 'Get AI suggestions', ja: 'AIに提案してもらう' },
+  'ai.thinking':     { en: 'Thinking…', ja: '考え中…' },
+  'ai.askAgain':     { en: 'Ask again', ja: 'もう一度聞く' },
+  'ai.errorPrefix':  { en: 'Couldn’t reach the AI service:', ja: 'AIサービスに接続できませんでした：' },
+  'ai.disclaimer': {
+    en: 'General educational suggestions, not personalized financial advice.',
+    ja: '一般的な教育目的の提案であり、個別の投資・税務助言ではありません。',
+  },
   // Summary cards (row 1)
   'res.curAge':        { en: 'My Current Age', ja: '現在の自分の年齢' },
   'res.lifeExpLabel':  { en: 'Life expectancy', ja: '想定寿命' },

@@ -107,6 +107,7 @@ body {
   .loaded-summary,
   .recs-panel,
   .opts-panel,
+  .ai-panel,
   .comparison-panel {
     border-radius: 24px;
     border: 1px solid rgba(255, 255, 255, 0.7);
@@ -319,9 +320,9 @@ body {
 }
 .chart-rotate-close {
   position: fixed;
-  /* Small close button in the BOTTOM-RIGHT of the screen, with equal spacing
-     from the right edge and from the top of the gesture-nav bar. */
-  bottom: calc(max(env(safe-area-inset-bottom), var(--android-nav-bottom, 0px)) + 14px);
+  /* Small close button in the BOTTOM-RIGHT corner, equal distance (14px) from
+     the bottom and right screen edges. */
+  bottom: 14px;
   right: 14px;
   z-index: 3001;
   width: 34px;
